@@ -1,19 +1,21 @@
+// lib/view/otp_validation_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:read/view/home_screen.dart';
-import 'package:read/view/otp_validation_screen.dart';
-import 'package:read/view/register.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class OTPValidationScreen extends StatefulWidget {
+  final String email;
+
+  const OTPValidationScreen({super.key, required this.email});
+
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  _OTPValidationScreenState createState() => _OTPValidationScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _OTPValidationScreenState extends State<OTPValidationScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _otpControllers = List.generate(6, (index) => TextEditingController());
+  final _focusNodes = List.generate(6, (index) => FocusNode());
 
   final Color _primaryColor = const Color(0xFF1E88E5);
   final Color _accentColor = const Color(0xFFFFC107);
@@ -23,19 +25,27 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
+    for (var controller in _otpControllers) {
+      controller.dispose();
+    }
+    for (var focusNode in _focusNodes) {
+      focusNode.dispose();
+    }
     super.dispose();
   }
 
-  void _login() {
+  void _validateOTP() {
     if (_formKey.currentState!.validate()) {
-      Get.toNamed('/otpvalidation', parameters: {'email': _emailController.text});
+      Get.to(const HomeScreen());
     }
   }
 
-  void _navigateToRegister() {
-    Get.toNamed('/register');
+  void _moveFocus(int index) {
+    if (index < 5) {
+      FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
+    } else {
+      _focusNodes[index].unfocus();
+    }
   }
 
   @override
@@ -74,35 +84,34 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   children: [
                     _buildCard(
-                      'Login Information',
+                      'OTP Validation',
                       Column(
                         children: [
-                          _buildTextField('Email', _emailController,
-                              TextInputType.emailAddress),
+                          Text(
+                            'An OTP has been sent to ${widget.email}',
+                            style: TextStyle(fontSize: 16, color: _primaryColor),
+                          ),
                           const SizedBox(height: 16),
-                          _buildPasswordField('Password', _passwordController),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: List.generate(6, (index) {
+                              return _buildOTPBox(index);
+                            }),
+                          ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 32),
                     ElevatedButton(
-                      onPressed: _login,
+                      onPressed: _validateOTP,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _buttonBackgroundColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
-                      child: const Text('Login',
+                      child: const Text('Validate OTP',
                           style: TextStyle(color: Colors.white)),
-                    ),
-                    const SizedBox(height: 16),
-                    TextButton(
-                      onPressed: _navigateToRegister,
-                      child: Text(
-                        'Register as a new user',
-                        style: TextStyle(color: _primaryColor),
-                      ),
                     ),
                   ],
                 ),
@@ -141,51 +150,34 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildTextField(
-      String label, TextEditingController controller, TextInputType inputType) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: inputType,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: _primaryColor),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+  Widget _buildOTPBox(int index) {
+    return SizedBox(
+      width: 40,
+      height: 50,
+      child: TextFormField(
+        controller: _otpControllers[index],
+        focusNode: _focusNodes[index],
+        keyboardType: TextInputType.number,
+        textAlign: TextAlign.center,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          counterText: '',
         ),
+        maxLength: 1,
+        onChanged: (value) {
+          if (value.isNotEmpty) {
+            _moveFocus(index);
+          }
+        },
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return '';
+          }
+          return null;
+        },
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter your $label';
-        }
-        if (label == 'Email' &&
-            !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-          return 'Please enter a valid email address';
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildPasswordField(String label, TextEditingController controller) {
-    return TextFormField(
-      controller: controller,
-      obscureText: true,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: _primaryColor),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter your $label';
-        }
-        if (value.length < 6) {
-          return 'Password must be at least 6 characters long';
-        }
-        return null;
-      },
     );
   }
 }
