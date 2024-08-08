@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "46132656723",
+    "project_id": "read-learn",
+    "storage_bucket": "read-learn.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:46132656723:android:f849bffc0843f3613864a6",
+        "android_client_info": {
+          "package_name": "com.vscoracademy.read"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDiKY2jS3Iw1ePEIFooW9wdLGHnCxD5NkU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
