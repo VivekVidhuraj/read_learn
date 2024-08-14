@@ -4,14 +4,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:read/view/login.dart';
 
 
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+class SplashScreen1 extends StatefulWidget {
+  const SplashScreen1({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  State<SplashScreen1> createState() => _SplashScreen1State();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreen1State extends State<SplashScreen1> {
   @override
   void initState() {
     super.initState();
