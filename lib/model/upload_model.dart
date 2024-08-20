@@ -14,33 +14,33 @@ class BookCategory {
   });
 
   factory BookCategory.fromDocument(DocumentSnapshot doc) {
-    var data = doc.data() as Map<String, dynamic>;
-    var subcategories = (data['subcategories'] as List<dynamic>).map((subcat) {
-      return Subcategory.fromMap(subcat);
-    }).toList();
+    final data = doc.data() as Map<String, dynamic>;
 
     return BookCategory(
-      categoryId: data['category_id'],
-      categoryName: data['category_name'],
-      categoryDesc: data['category_desc'],
-      subcategories: subcategories,
+      categoryId: data['category_id'] ?? '',
+      categoryName: data['category_name'] ?? '',
+      categoryDesc: data['category_desc'] ?? '',
+      subcategories: (data['subcategory'] as List<dynamic>?)
+          ?.map((subcategoryData) => Subcategory.fromMap(subcategoryData))
+          .toList() ??
+          [],
     );
   }
 }
 
 class Subcategory {
-  final String subcategoryId;
   final String subcategoryName;
+  final String subcategoryDesc;
 
   Subcategory({
-    required this.subcategoryId,
     required this.subcategoryName,
+    required this.subcategoryDesc,
   });
 
   factory Subcategory.fromMap(Map<String, dynamic> map) {
     return Subcategory(
-      subcategoryId: map['subcategory_id'],
-      subcategoryName: map['subcategory_name'],
+      subcategoryName: map['subcategory_name'] ?? '',
+      subcategoryDesc: map['subcategory_desc'] ?? '',
     );
   }
 }
