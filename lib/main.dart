@@ -1,56 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:read/controller/auth_controller.dart';
 import 'package:read/view/homescreen.dart';
 import 'package:read/view/loginscreen.dart';
 import 'package:read/view/signup.dart';
-import 'package:read/view/splashscreen.dart';
 
+import 'package:read/view/splashscreen.dart';
+import 'package:read/view/upload_book_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  await GetStorage.init(); // Initialize GetStorage
+  Get.put(AuthController());  // Initialize the AuthController
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialBinding: BindingsBuilder(() {
-        Get.put(AuthController()); // Initialize AuthController here
-      }),
-      initialRoute: '/splash',
-      getPages: [
-        GetPage(name: '/splash', page: () => SplashScreen()),
-        GetPage(name: '/login', page: () => LoginScreen()),
-        GetPage(name: '/signup', page: () => SignUpScreen()),
-        GetPage(name: '/home', page: () => HomeScreen()),
-      ],
+    return ScreenUtilInit(
+      designSize: Size(360,690),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      child: GetMaterialApp(
+        title: 'Read & Learn',
+        debugShowCheckedModeBanner: true,
+        initialRoute: '/',
+        getPages: [
+          GetPage(name: '/', page: () => HomeScreen()),
+          GetPage(name: '/login', page: () => LoginScreen()),
+          GetPage(name: '/register', page: () => SignUpScreen()),
+          // GetPage(name: '/home', page: () => HomeScreen()),
+          GetPage(name: '/uploadbook', page: ()=> UploadBookView()),
+
+        ],
+      ),
     );
   }
 }
-//
-// import 'package:flutter/material.dart';
-// import 'package:read/cliprectsamples/cliprectt.dart';
-//
-// void main() {
-//   runApp(const MyApp());
-// }
-//
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//
-//       home: const CliprectSample(),
-//     );
-//   }
-// }
-
