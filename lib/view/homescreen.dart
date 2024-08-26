@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:read/controller/banner_image_controller.dart';
 import 'package:read/controller/auth_controller.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -12,8 +14,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   final AuthController _authController = Get.find<AuthController>();
+  final BannerImageController _bannerImageController = Get.put(BannerImageController());
+
   final Color _primaryColor = const Color(0xFF0A0E21);
   final Color _secondaryColor = const Color(0xFFFFA726);
+  final Color _cardColor = const Color(0xFFF7F7F7); // Light color for the cards
 
   void _onItemTapped(int index) {
     setState(() {
@@ -25,10 +30,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: const Text('eLibrary', style: TextStyle(color: Colors.white)),
+        backgroundColor: _primaryColor,
+        elevation: 0,
         leading: Builder(
           builder: (BuildContext context) {
             return IconButton(
-              icon: Icon(Icons.menu, color: _primaryColor.withOpacity(0.7)),
+              icon: const Icon(Icons.menu, color: Colors.white),
               onPressed: () {
                 Scaffold.of(context).openDrawer();
               },
@@ -51,8 +59,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ],
-        backgroundColor: Colors.white,
-        elevation: 0,
       ),
       drawer: Drawer(
         child: ListView(
@@ -79,90 +85,48 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: _primaryColor.withOpacity(0.7),
               ),
             ),
-            _buildRegisteredEmails(),
-            ..._buildDrawerItems(),
+            ..._buildDrawerItems(), // Use the spread operator to add items
+            _buildPremiumSubscriptionItem(),
           ],
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSearchBar(),
-              const SizedBox(height: 20),
-              _buildSectionTitle('Featured Books'),
-              const SizedBox(height: 10),
-              _buildHorizontalScroll(
-                items: [
-                  _buildBookItem('asset/images/img.png', 'Book Title 1'),
-                  const SizedBox(width: 10),
-                  _buildBookItem('asset/images/img.png', 'Book Title 2'),
-                  const SizedBox(width: 10),
-                  _buildBookItem('asset/images/img.png', 'Book Title 3'),
-                ],
-              ),
-              const SizedBox(height: 20),
-              _buildSectionTitle('Recently Published'),
-              const SizedBox(height: 10),
-              _buildHorizontalScroll(
-                items: [
-                  _buildBookItem('asset/images/img.png', 'Book Title 4'),
-                  const SizedBox(width: 10),
-                  _buildBookItem('asset/images/img.png', 'Book Title 5'),
-                  const SizedBox(width: 10),
-                  _buildBookItem('asset/images/img.png', 'Book Title 6'),
-                ],
-              ),
-              const SizedBox(height: 20),
-              _buildSectionTitle('Bookmarks'),
-              const SizedBox(height: 10),
-              _buildHorizontalScroll(
-                items: [
-                  _buildBookmarkItem('Bookmark 1', () {
-                    // Handle button press for Bookmark 1
-                  }),
-                  const SizedBox(width: 10),
-                  _buildBookmarkItem('Bookmark 2', () {
-                    // Handle button press for Bookmark 2
-                  }),
-                  const SizedBox(width: 10),
-                  _buildBookmarkItem('Bookmark 3', () {
-                    // Handle button press for Bookmark 3
-                  }),
-                ],
-              ),
-              const SizedBox(height: 20),
-              _buildSectionTitle('Selected Authors'),
-              const SizedBox(height: 10),
-              _buildHorizontalScroll(
-                items: [
-                  _buildAuthorItem('asset/images/img_1.png', 'Author 1'),
-                  const SizedBox(width: 10),
-                  _buildAuthorItem('asset/images/img_1.png', 'Author 2'),
-                  const SizedBox(width: 10),
-                  _buildAuthorItem('asset/images/img_1.png', 'Author 3'),
-                ],
-              ),
-              const SizedBox(height: 20),
-              _buildSectionTitle('Categories'),
-              const SizedBox(height: 10),
-              _buildHorizontalScroll(
-                items: [
-                  _buildCategoryItem('asset/images/img_2.png', 'Category 1'),
-                  const SizedBox(width: 10),
-                  _buildCategoryItem('asset/images/img_2.png', 'Category 2'),
-                  const SizedBox(width: 10),
-                  _buildCategoryItem('asset/images/img_2.png', 'Category 3'),
-                ],
-              ),
-              const SizedBox(height: 20),
-              _buildSubscriptionItem('Premium Subscription', () {
-                // Handle button press for Subscription
-              }),
-            ],
-          ),
+      body: Container(
+        color: Colors.white, // Background color
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
+          children: [
+            _buildSearchBar(),
+            const SizedBox(height: 16),
+            _buildBannerCarousel(),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Featured Books'),
+            const SizedBox(height: 10),
+            _buildFeaturedBooks(),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Recently Published'),
+            const SizedBox(height: 10),
+            _buildRecentlyPublishedBooks(),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Bookmarks'),
+            const SizedBox(height: 10),
+            _buildBookmarks(),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Selected Authors'),
+            const SizedBox(height: 10),
+            _buildHorizontalScroll(
+              items: [
+                _buildAuthorItem('asset/images/img_1.png', 'Author 1'),
+                const SizedBox(width: 10),
+                _buildAuthorItem('asset/images/img_1.png', 'Author 2'),
+                const SizedBox(width: 10),
+                _buildAuthorItem('asset/images/img_1.png', 'Author 3'),
+              ],
+            ),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Categories'),
+            const SizedBox(height: 10),
+            _buildCategories(),
+          ],
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -192,14 +156,86 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildRegisteredEmails() {
+  Widget _buildBannerCarousel() {
     return Obx(() {
-      final emails = _authController.registeredEmails;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: emails.map((email) => ListTile(title: Text(email))).toList(),
+      if (_bannerImageController.bannerImages.isEmpty) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      return CarouselSlider(
+        options: CarouselOptions(
+          autoPlay: true,
+          aspectRatio: 16 / 9,
+          enlargeCenterPage: true,
+          viewportFraction: 1.0,
+          height: 150, // Adjust the height as needed
+        ),
+        items: _bannerImageController.bannerImages.map((bannerImage) {
+          return Builder(
+            builder: (BuildContext context) {
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(bannerImage.imageUrl),
+                    fit: BoxFit.cover,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              );
+            },
+          );
+        }).toList(),
       );
     });
+  }
+
+  Widget _buildFeaturedBooks() {
+    return _buildHorizontalScroll(
+      items: [
+        _buildBookItem('asset/images/img.png', 'Book Title 1', '120'),
+        const SizedBox(width: 10),
+        _buildBookItem('asset/images/img.png', 'Book Title 2', '85'),
+        const SizedBox(width: 10),
+        _buildBookItem('asset/images/img.png', 'Book Title 3', '200'),
+      ],
+    );
+  }
+
+  Widget _buildRecentlyPublishedBooks() {
+    return _buildHorizontalScroll(
+      items: [
+        _buildBookItem('asset/images/img.png', 'Book Title 4', '45'),
+        const SizedBox(width: 10),
+        _buildBookItem('asset/images/img.png', 'Book Title 5', '72'),
+        const SizedBox(width: 10),
+        _buildBookItem('asset/images/img.png', 'Book Title 6', '90'),
+      ],
+    );
+  }
+
+  Widget _buildBookmarks() {
+    return _buildHorizontalScroll(
+      items: [
+        _buildBookmarkItem('Book Name 1', 'Page: 32'),
+        const SizedBox(width: 10),
+        _buildBookmarkItem('Book Name 2', 'Page: 67'),
+        const SizedBox(width: 10),
+        _buildBookmarkItem('Book Name 3', 'Page: 98'),
+      ],
+    );
+  }
+
+  Widget _buildCategories() {
+    return _buildHorizontalScroll(
+      items: [
+        _buildCategoryItem('asset/images/img_2.png', 'Category 1'),
+        const SizedBox(width: 10),
+        _buildCategoryItem('asset/images/img_2.png', 'Category 2'),
+        const SizedBox(width: 10),
+        _buildCategoryItem('asset/images/img_2.png', 'Category 3'),
+      ],
+    );
   }
 
   List<Widget> _buildDrawerItems() {
@@ -224,12 +260,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSearchBar() {
-    return TextField(
-      decoration: InputDecoration(
-        hintText: 'Search For Books or Authors',
-        prefixIcon: const Icon(Icons.search),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: TextField(
+        decoration: InputDecoration(
+          prefixIcon: const Icon(Icons.search),
+          hintText: 'Search...',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       ),
     );
@@ -244,115 +283,221 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHorizontalScroll({required List<Widget> items}) {
     return SizedBox(
-      height: 200, // Set a fixed height if necessary
-      child: SingleChildScrollView(
+      height: 220, // Adjusted the height to fit book covers better
+      child: ListView(
         scrollDirection: Axis.horizontal,
-        child: Row(
-          children: items,
-        ),
+        children: items,
       ),
     );
   }
 
-  Widget _buildBookItem(String assetPath, String bookTitle) {
-    return SizedBox(
-      width: 100,
-      child: Column(
-        children: [
-          Expanded(
-            child: Image.asset(assetPath, fit: BoxFit.cover),
-          ),
-          const SizedBox(height: 5),
-          Text(bookTitle, overflow: TextOverflow.ellipsis),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBookmarkItem(String bookmarkName, VoidCallback onPressed) {
+  Widget _buildBookItem(String imagePath, String title, String pageCount) {
     return Container(
-      margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.all(16),
+      width: 140,
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: _primaryColor.withOpacity(0.5),
+        color: _cardColor,
         borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            blurRadius: 5,
+            spreadRadius: 1,
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            bookmarkName,
-            style: const TextStyle(
-                color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _secondaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+          Container(
+            height: 120,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(imagePath),
+                fit: BoxFit.cover,
               ),
+              borderRadius: BorderRadius.circular(10),
             ),
-            onPressed: onPressed,
-            child: const Text('Read More'),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$pageCount pages',
+            style: const TextStyle(color: Colors.grey),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAuthorItem(String assetPath, String authorName) {
-    return Column(
-      children: [
-        CircleAvatar(
-          radius: 40,
-          backgroundImage: AssetImage(assetPath),
-        ),
-        const SizedBox(height: 5),
-        Text(authorName, overflow: TextOverflow.ellipsis),
-      ],
-    );
-  }
-
-  Widget _buildCategoryItem(String assetPath, String categoryName) {
-    return Column(
-      children: [
-        SizedBox(
-          width: 100,
-          height: 100,
-          child: Image.asset(assetPath, fit: BoxFit.cover),
-        ),
-        const SizedBox(height: 5),
-        Text(categoryName, overflow: TextOverflow.ellipsis),
-      ],
-    );
-  }
-
-  Widget _buildSubscriptionItem(String subscriptionName, VoidCallback onPressed) {
+  Widget _buildBookmarkItem(String bookName, String pageNumber) {
     return Container(
-      margin: const EdgeInsets.only(right: 10),
+      width: 140,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: _cardColor,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            blurRadius: 5,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.bookmark, size: 40, color: Colors.orange),
+          const SizedBox(height: 10),
+          Text(
+            bookName,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            pageNumber,
+            style: const TextStyle(color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAuthorItem(String imagePath, String authorName) {
+    return Container(
+      width: 120,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: _cardColor,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            blurRadius: 5,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          CircleAvatar(
+            backgroundImage: AssetImage(imagePath),
+            radius: 40,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            authorName,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryItem(String imagePath, String categoryName) {
+    return Container(
+      width: 100,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: _cardColor,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            blurRadius: 5,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Image.asset(
+            imagePath,
+            height: 60,
+            width: 60,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            categoryName,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPremiumSubscriptionItem() {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _primaryColor.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            subscriptionName,
-            style: const TextStyle(
-                color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+        gradient: LinearGradient(
+          colors: [_primaryColor, _secondaryColor],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _secondaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+        ],
+      ),
+      child: Column(
+        children: [
+          const Icon(
+            Icons.star,
+            color: Colors.white,
+            size: 40,
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            'Premium Subscription',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
             ),
-            onPressed: onPressed,
-            child: const Text('Subscribe'),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Unlock exclusive features and content',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton(
+            onPressed: () {
+              // Navigate to subscription page or show subscription details
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: _primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+              textStyle: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              elevation: 3, // Slight elevation for better visual appearance
+            ),
+            child: const Text('Subscribe Now'),
           ),
         ],
       ),
