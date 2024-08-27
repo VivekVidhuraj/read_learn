@@ -65,22 +65,35 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             UserAccountsDrawerHeader(
-              accountName: Obx(() => Text(_authController.user.value?.displayName ?? "User Name")),
-              accountEmail: Obx(() => Text(_authController.user.value?.email ?? "email@example.com")),
-              currentAccountPicture: Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: ClipOval(
-                    child: Image.asset(
-                      'asset/images/img_3.png',
-                      fit: BoxFit.cover,
-                      width: 90,
-                      height: 90,
+              accountName: Obx(() => Text(_authController.user?.displayName ?? "User Name")),
+              accountEmail: Obx(() => Text(_authController.user?.email ?? "email@example.com")),
+              currentAccountPicture: Obx(() {
+                if (_authController.user?.photoURL != null) {
+                  return CircleAvatar(
+                    backgroundColor: Colors.white,
+                    child: ClipOval(
+                      child: Image.network(
+                        _authController.user!.photoURL!,
+                        fit: BoxFit.cover,
+                        width: 90,
+                        height: 90,
+                      ),
                     ),
-                  ),
-                ),
-              ),
+                  );
+                } else {
+                  return CircleAvatar(
+                    backgroundColor: Colors.white,
+                    child: ClipOval(
+                      child: Image.asset(
+                        'asset/images/img_3.png',
+                        fit: BoxFit.cover,
+                        width: 90,
+                        height: 90,
+                      ),
+                    ),
+                  );
+                }
+              }),
               decoration: BoxDecoration(
                 color: _primaryColor.withOpacity(0.7),
               ),
@@ -190,249 +203,69 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Widget _buildFeaturedBooks() {
-    return _buildHorizontalScroll(
-      items: [
-        _buildBookItem('asset/images/img.png', 'Book Title 1', '120'),
-        const SizedBox(width: 10),
-        _buildBookItem('asset/images/img.png', 'Book Title 2', '85'),
-        const SizedBox(width: 10),
-        _buildBookItem('asset/images/img.png', 'Book Title 3', '200'),
-      ],
-    );
-  }
-
-  Widget _buildRecentlyPublishedBooks() {
-    return _buildHorizontalScroll(
-      items: [
-        _buildBookItem('asset/images/img.png', 'Book Title 4', '45'),
-        const SizedBox(width: 10),
-        _buildBookItem('asset/images/img.png', 'Book Title 5', '72'),
-        const SizedBox(width: 10),
-        _buildBookItem('asset/images/img.png', 'Book Title 6', '90'),
-      ],
-    );
-  }
-
-  Widget _buildBookmarks() {
-    return _buildHorizontalScroll(
-      items: [
-        _buildBookmarkItem('Book Name 1', 'Page: 32'),
-        const SizedBox(width: 10),
-        _buildBookmarkItem('Book Name 2', 'Page: 67'),
-        const SizedBox(width: 10),
-        _buildBookmarkItem('Book Name 3', 'Page: 98'),
-      ],
-    );
-  }
-
-  Widget _buildCategories() {
-    return _buildHorizontalScroll(
-      items: [
-        _buildCategoryItem('asset/images/img_2.png', 'Category 1'),
-        const SizedBox(width: 10),
-        _buildCategoryItem('asset/images/img_2.png', 'Category 2'),
-        const SizedBox(width: 10),
-        _buildCategoryItem('asset/images/img_2.png', 'Category 3'),
-      ],
-    );
-  }
-
-  List<Widget> _buildDrawerItems() {
-    return [
-      _buildDrawerItem('My Books', Icons.book),
-      _buildDrawerItem('Bookmarks', Icons.bookmark),
-      _buildDrawerItem('Notifications', Icons.notifications),
-      _buildDrawerItem('Settings', Icons.settings),
-      _buildDrawerItem('Help', Icons.help),
-      _buildDrawerItem('Log Out', Icons.logout, onTap: _authController.signOut),
-    ];
-  }
-
-  Widget _buildDrawerItem(String title, IconData iconData, {VoidCallback? onTap}) {
-    return ListTile(
-      leading: Icon(iconData, color: _primaryColor.withOpacity(0.5)),
-      title: Text(title),
-      onTap: onTap ?? () {
-        Navigator.pop(context);
-      },
-    );
-  }
-
   Widget _buildSearchBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: TextField(
-        decoration: InputDecoration(
-          prefixIcon: const Icon(Icons.search),
-          hintText: 'Search...',
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
+      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+      decoration: BoxDecoration(
+        color: _cardColor,
+        borderRadius: BorderRadius.circular(20.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
           ),
+        ],
+      ),
+      child: const TextField(
+        decoration: InputDecoration(
+          hintText: 'Search for books...',
+          border: InputBorder.none,
+          prefixIcon: Icon(Icons.search),
         ),
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-    );
-  }
-
-  Widget _buildHorizontalScroll({required List<Widget> items}) {
-    return SizedBox(
-      height: 220, // Adjusted the height to fit book covers better
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: items,
+  List<Widget> _buildDrawerItems() {
+    return [
+      ListTile(
+        leading: const Icon(Icons.home),
+        title: const Text('Home'),
+        onTap: () {
+          Get.toNamed('/home');
+        },
       ),
-    );
-  }
-
-  Widget _buildBookItem(String imagePath, String title, String pageCount) {
-    return Container(
-      width: 140,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: _cardColor,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            blurRadius: 5,
-            spreadRadius: 1,
-          ),
-        ],
+      ListTile(
+        leading: const Icon(Icons.book),
+        title: const Text('My Books'),
+        onTap: () {
+          // Navigate to My Books screen
+        },
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 120,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(imagePath),
-                fit: BoxFit.cover,
-              ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '$pageCount pages',
-            style: const TextStyle(color: Colors.grey),
-          ),
-        ],
+      ListTile(
+        leading: const Icon(Icons.bookmark),
+        title: const Text('Bookmarks'),
+        onTap: () {
+          // Navigate to Bookmarks screen
+        },
       ),
-    );
-  }
-
-  Widget _buildBookmarkItem(String bookName, String pageNumber) {
-    return Container(
-      width: 140,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: _cardColor,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            blurRadius: 5,
-            spreadRadius: 1,
-          ),
-        ],
+      ListTile(
+        leading: const Icon(Icons.settings),
+        title: const Text('Settings'),
+        onTap: () {
+          // Navigate to Settings screen
+        },
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.bookmark, size: 40, color: Colors.orange),
-          const SizedBox(height: 10),
-          Text(
-            bookName,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            pageNumber,
-            style: const TextStyle(color: Colors.grey),
-          ),
-        ],
+      ListTile(
+        leading: const Icon(Icons.logout),
+        title: const Text('Logout'),
+        onTap: () {
+          _authController.signOut();
+        },
       ),
-    );
-  }
-
-  Widget _buildAuthorItem(String imagePath, String authorName) {
-    return Container(
-      width: 120,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: _cardColor,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            blurRadius: 5,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          CircleAvatar(
-            backgroundImage: AssetImage(imagePath),
-            radius: 40,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            authorName,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryItem(String imagePath, String categoryName) {
-    return Container(
-      width: 100,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: _cardColor,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            blurRadius: 5,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Image.asset(
-            imagePath,
-            height: 60,
-            width: 60,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            categoryName,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
+    ];
   }
 
   Widget _buildPremiumSubscriptionItem() {
@@ -470,36 +303,222 @@ class _HomeScreenState extends State<HomeScreen> {
               fontSize: 18,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 5),
           const Text(
-            'Unlock exclusive features and content',
+            'Get access to exclusive books and features!',
             style: TextStyle(
               color: Colors.white,
               fontSize: 14,
             ),
-            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           ElevatedButton(
             onPressed: () {
-              // Navigate to subscription page or show subscription details
+              // Handle subscription action
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: _primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-              textStyle: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-              elevation: 3, // Slight elevation for better visual appearance
             ),
             child: const Text('Subscribe Now'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: TextStyle(
+        color: _primaryColor,
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  Widget _buildFeaturedBooks() {
+    // Mock data for demonstration
+    return SizedBox(
+      height: 200, // Adjust height as needed
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: 10, // Adjust count as needed
+        itemBuilder: (context, index) {
+          return Container(
+            width: 120,
+            margin: const EdgeInsets.symmetric(horizontal: 8.0),
+            decoration: BoxDecoration(
+              color: _cardColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('asset/images/img_2.png'), // Example image
+                        fit: BoxFit.cover,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Book Title',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                const Text('Author Name'),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildRecentlyPublishedBooks() {
+    // Mock data for demonstration
+    return SizedBox(
+      height: 200, // Adjust height as needed
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: 10, // Adjust count as needed
+        itemBuilder: (context, index) {
+          return Container(
+            width: 120,
+            margin: const EdgeInsets.symmetric(horizontal: 8.0),
+            decoration: BoxDecoration(
+              color: _cardColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('asset/images/img_2.png'), // Example image
+                        fit: BoxFit.cover,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Book Title',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                const Text('Author Name'),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildBookmarks() {
+    // Mock data for demonstration
+    return SizedBox(
+      height: 200, // Adjust height as needed
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: 10, // Adjust count as needed
+        itemBuilder: (context, index) {
+          return Container(
+            width: 120,
+            margin: const EdgeInsets.symmetric(horizontal: 8.0),
+            decoration: BoxDecoration(
+              color: _cardColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('asset/images/img_2.png'), // Example image
+                        fit: BoxFit.cover,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Book Title',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                const Text('Author Name'),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildAuthorItem(String imagePath, String name) {
+    return Container(
+      width: 120,
+      margin: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 40,
+            backgroundImage: AssetImage(imagePath),
+          ),
+          const SizedBox(height: 8),
+          Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHorizontalScroll({required List<Widget> items}) {
+    return SizedBox(
+      height: 120, // Adjust height as needed
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: items,
+      ),
+    );
+  }
+
+  Widget _buildCategories() {
+    // Mock data for demonstration
+    return SizedBox(
+      height: 120, // Adjust height as needed
+      child: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 10.0,
+          mainAxisSpacing: 10.0,
+        ),
+        itemCount: 6, // Adjust count as needed
+        itemBuilder: (context, index) {
+          return Container(
+            decoration: BoxDecoration(
+              color: _cardColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Center(
+              child: Text(
+                'Category ${index + 1}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

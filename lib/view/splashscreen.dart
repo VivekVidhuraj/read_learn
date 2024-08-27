@@ -1,70 +1,60 @@
+// lib/view/splashscreen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:read/controller/auth_controller.dart';
 import 'package:lottie/lottie.dart';
+import 'package:read/controller/auth_controller.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
   final AuthController _authController = Get.find<AuthController>();
 
-  SplashScreen({super.key});
+  @override
+  void initState() {
+    super.initState();
+    _navigateToNextScreen();
+  }
+
+  void _navigateToNextScreen() async {
+    await Future.delayed(Duration(seconds: 2)); // Show splash for 2 seconds
+
+    final user = _authController.user;
+
+    if (user != null) {
+      // User is logged in
+      Get.offAllNamed('/home'); // Navigate to home screen
+    } else {
+      // User is not logged in
+      Get.offAllNamed('/login'); // Navigate to login screen
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0E21),
-      body: Stack(
-        children: [
-          // Background gradient
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF0A0E21), Color(0xFF1D1E33)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Replace with your Lottie animation
+            SizedBox(
+              height: 200, // Set a fixed height for the Lottie animation
+              child: Lottie.asset('asset/lottie/splashScreen.json'), // Replace with your Lottie animation file
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Welcome to eLibrary', // Replace with your app's tagline
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
             ),
-          ),
-          // Lottie animation in the center
-          Center(
-            child: Lottie.asset(
-              'asset/lottie/splashScreen.json',
-              width: 200,
-              height: 200,
-              onLoaded: (composition) async {
-                await Future.delayed(composition.duration);
-                _authController.handleUserAuth();
-              },
-            ),
-          ),
-          // App title or logo below the animation
-          Positioned(
-            bottom: 50,
-            left: 0,
-            right: 0,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'ReadIt', // Replace with your app name
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 2,
-                  ),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  'Discover a world of books',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

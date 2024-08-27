@@ -29,11 +29,12 @@ class MyApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       child: GetMaterialApp(
-        title: 'Read & Learn',
+        title: 'eLibrary',
         debugShowCheckedModeBanner: false, // Hide debug banner
         initialRoute: '/',
         getPages: [
-          GetPage(name: '/', page: () => HomeScreen()),
+          GetPage(name: '/', page: () => SplashScreen()),
+          GetPage(name: '/home', page: () => HomeScreen()),
           GetPage(name: '/login', page: () => LoginScreen()),
           GetPage(name: '/register', page: () => SignUpScreen()),
           GetPage(name: '/uploadbook', page: () => UploadBookView()),

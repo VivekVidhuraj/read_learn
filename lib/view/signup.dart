@@ -1,13 +1,44 @@
+// lib/view/sign_up_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:read/controller/auth_controller.dart';
 
-class SignUpScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
+  @override
+  _SignUpScreenState createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
   final AuthController _authController = Get.find<AuthController>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+  final RxBool _obscurePassword = true.obs;
+  final RxBool _obscureConfirmPassword = true.obs;
 
-  SignUpScreen({super.key});
+  void _togglePasswordVisibility() {
+    _obscurePassword.value = !_obscurePassword.value;
+  }
+
+  void _toggleConfirmPasswordVisibility() {
+    _obscureConfirmPassword.value = !_obscureConfirmPassword.value;
+  }
+
+  Future<void> _handleSignUp() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      Get.snackbar('Error', 'Please fill in all fields.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white);
+      return;
+    }
+
+    await _authController.signUp(email, password, confirmPassword);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,46 +50,34 @@ class SignUpScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
+              Text(
                 'Sign Up',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
               const SizedBox(height: 20),
-              TextField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
+              _buildTextField(
+                'Email',
+                _emailController,
+                TextInputType.emailAddress,
               ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                obscureText: true,
-              ),
+              const SizedBox(height: 16),
+              _buildPasswordField('Password', _passwordController),
+              const SizedBox(height: 16),
+              _buildPasswordField('Confirm Password', _confirmPasswordController, isConfirmPassword: true),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () async {
-                  await _authController.signUp(
-                    _emailController.text.trim(),
-                    _passwordController.text.trim(),
-                  );
-                },
+                onPressed: _handleSignUp,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0A0E21),
+                  backgroundColor: const Color(0xFF0A0E21), // Background color of the button
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text('Sign Up'),
+                child: const Text('Sign Up', style: TextStyle(color: Colors.white)),
               ),
               TextButton(
                 onPressed: () {
@@ -67,6 +86,45 @@ class SignUpScreen extends StatelessWidget {
                 child: const Text('Already have an account? Login'),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(String label, TextEditingController controller, TextInputType inputType) {
+    return TextField(
+      controller: controller,
+      keyboardType: inputType,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      ),
+    );
+  }
+
+  Widget _buildPasswordField(String label, TextEditingController controller, {bool isConfirmPassword = false}) {
+    return Obx(
+          () => TextField(
+        controller: controller,
+        obscureText: isConfirmPassword ? _obscureConfirmPassword.value : _obscurePassword.value,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          suffixIcon: IconButton(
+            icon: Icon(
+              isConfirmPassword
+                  ? _obscureConfirmPassword.value ? Icons.visibility : Icons.visibility_off
+                  : _obscurePassword.value ? Icons.visibility : Icons.visibility_off,
+              color: Colors.grey,
+            ),
+            onPressed: isConfirmPassword ? _toggleConfirmPasswordVisibility : _togglePasswordVisibility,
           ),
         ),
       ),
