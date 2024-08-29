@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart'; // For FilePicker
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart'; // Import for FilePicker
+import 'package:firebase_storage/firebase_storage.dart'; // Import for Firebase Storage
 import 'package:read/model/upload_model.dart'; // Ensure this import is correct
 
 class UploadController extends GetxController {
@@ -64,7 +65,63 @@ class UploadController extends GetxController {
   }
 
   Future<void> uploadBook() async {
-    // Implement book upload logic
+    if (nameController.text.isEmpty || authorController.text.isEmpty || priceController.text.isEmpty || descriptionController.text.isEmpty) {
+      Get.snackbar('Error', 'Please fill in all fields',
+          backgroundColor: Colors.red,
+          colorText: Colors.white);
+      return;
+    }
+
+    if (selectedPdf.value == null || selectedImage.value == null) {
+      Get.snackbar('Error', 'Please select both a PDF and an image',
+          backgroundColor: Colors.red,
+          colorText: Colors.white);
+      return;
+    }
+
+    try {
+      // Use book name to create filename
+      final bookName = nameController.text.replaceAll(RegExp(r'[^\w\s]+'), '_'); // Replace special characters
+      final imageRef = FirebaseStorage.instance.ref().child('book_covers/$bookName.png');
+      final uploadImageTask = imageRef.putFile(selectedImage.value!);
+      final imageUrl = await (await uploadImageTask).ref.getDownloadURL();
+
+      final pdfRef = FirebaseStorage.instance.ref().child('book_pdfs/$bookName.pdf');
+      final uploadPdfTask = pdfRef.putFile(selectedPdf.value!);
+      final pdfUrl = await (await uploadPdfTask).ref.getDownloadURL();
+
+      await FirebaseFirestore.instance.collection('books').add({
+        'name': nameController.text,
+        'author': authorController.text,
+        'price': double.tryParse(priceController.text) ?? 0.0,
+        'description': descriptionController.text,
+        'category_id': selectedCategory.value?.categoryId ?? '',
+        'subcategory_name': selectedSubcategory.value?.subcategoryName ?? '',
+        'cover_url': imageUrl,
+        'pdf_url': pdfUrl,
+        'created_at': Timestamp.now(),
+      });
+
+      Get.snackbar('Success', 'Book uploaded successfully',
+          backgroundColor: Color(0xFF0A0E21),
+          colorText: Colors.white);
+
+      // Clear all fields after upload
+      nameController.clear();
+      authorController.clear();
+      priceController.clear();
+      descriptionController.clear();
+      selectedPdf.value = null;
+      selectedImage.value = null;
+      selectedCategory.value = null;
+      selectedSubcategory.value = null;
+
+    } catch (e) {
+      print('Error uploading book: $e');
+      Get.snackbar('Error', 'Failed to upload book',
+          backgroundColor: Colors.red,
+          colorText: Colors.white);
+    }
   }
 
   @override
