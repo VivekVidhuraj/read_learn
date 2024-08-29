@@ -4,6 +4,8 @@ import 'package:flutter/material.dart'; // For FilePicker
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart'; // Import for FilePicker
 import 'package:firebase_storage/firebase_storage.dart'; // Import for Firebase Storage
+import 'package:firebase_auth/firebase_auth.dart'; // Import for Firebase Authentication
+import 'package:syncfusion_flutter_pdf/pdf.dart'; // Import for PDF page count
 import 'package:read/model/upload_model.dart'; // Ensure this import is correct
 
 class UploadController extends GetxController {
@@ -64,6 +66,17 @@ class UploadController extends GetxController {
     }
   }
 
+  Future<int> getPdfPageCount(File pdfFile) async {
+    try {
+      final documentBytes = await pdfFile.readAsBytes();
+      final document = PdfDocument(inputBytes: documentBytes);
+      return document.pages.count;
+    } catch (e) {
+      print('Error getting PDF page count: $e');
+      return 0; // Return 0 if there's an error
+    }
+  }
+
   Future<void> uploadBook() async {
     if (nameController.text.isEmpty || authorController.text.isEmpty || priceController.text.isEmpty || descriptionController.text.isEmpty) {
       Get.snackbar('Error', 'Please fill in all fields',
@@ -80,6 +93,15 @@ class UploadController extends GetxController {
     }
 
     try {
+      // Get current user ID
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        Get.snackbar('Error', 'User not logged in',
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
+        return;
+      }
+
       // Use book name to create filename
       final bookName = nameController.text.replaceAll(RegExp(r'[^\w\s]+'), '_'); // Replace special characters
       final imageRef = FirebaseStorage.instance.ref().child('book_covers/$bookName.png');
@@ -90,7 +112,14 @@ class UploadController extends GetxController {
       final uploadPdfTask = pdfRef.putFile(selectedPdf.value!);
       final pdfUrl = await (await uploadPdfTask).ref.getDownloadURL();
 
-      await FirebaseFirestore.instance.collection('books').add({
+      // Get PDF page count
+      final pageCount = await getPdfPageCount(selectedPdf.value!);
+
+      // Determine collection based on page count
+      final collectionName = pageCount > 20 ? 'premium_books' : 'normal_books';
+
+      // Upload book details to the determined collection
+      await FirebaseFirestore.instance.collection(collectionName).add({
         'name': nameController.text,
         'author': authorController.text,
         'price': double.tryParse(priceController.text) ?? 0.0,
@@ -99,7 +128,9 @@ class UploadController extends GetxController {
         'subcategory_name': selectedSubcategory.value?.subcategoryName ?? '',
         'cover_url': imageUrl,
         'pdf_url': pdfUrl,
+        'page_count': pageCount,
         'created_at': Timestamp.now(),
+        'user_id': userId, // Add user ID
       });
 
       Get.snackbar('Success', 'Book uploaded successfully',

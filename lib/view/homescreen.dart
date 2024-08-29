@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:read/controller/banner_image_controller.dart';
 import 'package:read/controller/auth_controller.dart';
+import 'package:read/view/my_books_page.dart'; // Import the new page
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,6 +24,20 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      switch (_selectedIndex) {
+        case 0:
+          Get.toNamed('/home');
+          break;
+        case 1:
+          Get.toNamed('/mybooks'); // Navigate to the new page
+          break;
+        case 2:
+        // Handle Bookmarks navigation
+          break;
+        case 3:
+        // Handle Profile navigation
+          break;
+      }
     });
   }
 
@@ -241,7 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: const Icon(Icons.book),
         title: const Text('My Books'),
         onTap: () {
-          // Navigate to My Books screen
+          Get.toNamed('/mybooks'); // Navigate to the new page
         },
       ),
       ListTile(
@@ -299,27 +314,31 @@ class _HomeScreenState extends State<HomeScreen> {
             'Premium Subscription',
             style: TextStyle(
               color: Colors.white,
-              fontWeight: FontWeight.bold,
               fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 10),
           const Text(
-            'Get access to exclusive books and features!',
+            'Get unlimited access to premium content and features.',
             style: TextStyle(
               color: Colors.white,
               fontSize: 14,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 10),
           ElevatedButton(
-            onPressed: () {
-              // Handle subscription action
-            },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: _primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
             ),
+            onPressed: () {
+              // Handle subscription action
+            },
             child: const Text('Subscribe Now'),
           ),
         ],
@@ -331,48 +350,55 @@ class _HomeScreenState extends State<HomeScreen> {
     return Text(
       title,
       style: TextStyle(
-        color: _primaryColor,
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: FontWeight.bold,
+        color: _primaryColor,
       ),
     );
   }
 
   Widget _buildFeaturedBooks() {
-    // Mock data for demonstration
     return SizedBox(
-      height: 200, // Adjust height as needed
+      height: 150,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: 10, // Adjust count as needed
+        itemCount: 10, // Number of featured books
         itemBuilder: (context, index) {
           return Container(
-            width: 120,
-            margin: const EdgeInsets.symmetric(horizontal: 8.0),
+            margin: const EdgeInsets.only(right: 10),
+            width: 100,
             decoration: BoxDecoration(
               color: _cardColor,
               borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.3),
+                  spreadRadius: 2,
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('asset/images/img_2.png'), // Example image
+                      image: const DecorationImage(
+                        image: AssetImage('asset/images/sample_book_cover.png'),
                         fit: BoxFit.cover,
                       ),
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 5),
                 const Text(
                   'Book Title',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 4),
-                const Text('Author Name'),
               ],
             ),
           );
@@ -382,40 +408,47 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildRecentlyPublishedBooks() {
-    // Mock data for demonstration
     return SizedBox(
-      height: 200, // Adjust height as needed
+      height: 150,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: 10, // Adjust count as needed
+        itemCount: 10, // Number of recently published books
         itemBuilder: (context, index) {
           return Container(
-            width: 120,
-            margin: const EdgeInsets.symmetric(horizontal: 8.0),
+            margin: const EdgeInsets.only(right: 10),
+            width: 100,
             decoration: BoxDecoration(
               color: _cardColor,
               borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.3),
+                  spreadRadius: 2,
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('asset/images/img_2.png'), // Example image
+                      image: const DecorationImage(
+                        image: AssetImage('asset/images/sample_book_cover.png'),
                         fit: BoxFit.cover,
                       ),
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 5),
                 const Text(
                   'Book Title',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 4),
-                const Text('Author Name'),
               ],
             ),
           );
@@ -425,40 +458,47 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBookmarks() {
-    // Mock data for demonstration
     return SizedBox(
-      height: 200, // Adjust height as needed
+      height: 150,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: 10, // Adjust count as needed
+        itemCount: 10, // Number of bookmarks
         itemBuilder: (context, index) {
           return Container(
-            width: 120,
-            margin: const EdgeInsets.symmetric(horizontal: 8.0),
+            margin: const EdgeInsets.only(right: 10),
+            width: 100,
             decoration: BoxDecoration(
               color: _cardColor,
               borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.3),
+                  spreadRadius: 2,
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('asset/images/img_2.png'), // Example image
+                      image: const DecorationImage(
+                        image: AssetImage('asset/images/sample_book_cover.png'),
                         fit: BoxFit.cover,
                       ),
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 5),
                 const Text(
                   'Book Title',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 4),
-                const Text('Author Name'),
               ],
             ),
           );
@@ -469,16 +509,38 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildAuthorItem(String imagePath, String name) {
     return Container(
-      width: 120,
-      margin: const EdgeInsets.symmetric(horizontal: 8.0),
+      width: 100,
+      decoration: BoxDecoration(
+        color: _cardColor,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 2,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
         children: [
-          CircleAvatar(
-            radius: 40,
-            backgroundImage: AssetImage(imagePath),
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(imagePath),
+                  fit: BoxFit.cover,
+                ),
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
           ),
-          const SizedBox(height: 8),
-          Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 5),
+          Text(
+            name,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
@@ -486,7 +548,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHorizontalScroll({required List<Widget> items}) {
     return SizedBox(
-      height: 120, // Adjust height as needed
+      height: 150,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: items,
@@ -495,27 +557,48 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildCategories() {
-    // Mock data for demonstration
     return SizedBox(
-      height: 120, // Adjust height as needed
-      child: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 10.0,
-          mainAxisSpacing: 10.0,
-        ),
-        itemCount: 6, // Adjust count as needed
+      height: 100,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: 10, // Number of categories
         itemBuilder: (context, index) {
           return Container(
+            margin: const EdgeInsets.only(right: 10),
+            width: 80,
             decoration: BoxDecoration(
               color: _cardColor,
               borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.3),
+                  spreadRadius: 2,
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            child: Center(
-              child: Text(
-                'Category ${index + 1}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      image: const DecorationImage(
+                        image: AssetImage('asset/images/sample_category_image.png'),
+                        fit: BoxFit.cover,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 5),
+                const Text(
+                  'Category Name',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           );
         },

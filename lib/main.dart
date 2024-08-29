@@ -6,9 +6,11 @@ import 'package:read/controller/auth_controller.dart';
 import 'package:read/controller/banner_image_controller.dart';
 import 'package:read/view/homescreen.dart';
 import 'package:read/view/loginscreen.dart';
+
 import 'package:read/view/signup.dart';
 import 'package:read/view/splashscreen.dart';
 import 'package:read/view/upload_book_view.dart';
+import 'package:read/view/my_books_page.dart'; // Import the new page
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +40,7 @@ class MyApp extends StatelessWidget {
           GetPage(name: '/login', page: () => LoginScreen()),
           GetPage(name: '/register', page: () => SignUpScreen()),
           GetPage(name: '/uploadbook', page: () => UploadBookView()),
-          // Add other routes as needed
+          GetPage(name: '/mybooks', page: () => MyBooksPage()), // Add new route
         ],
       ),
     );
