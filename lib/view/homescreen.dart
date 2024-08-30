@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:read/controller/banner_image_controller.dart';
 import 'package:read/controller/auth_controller.dart';
-import 'package:read/view/my_books_page.dart'; // Import the new page
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,8 +17,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final BannerImageController _bannerImageController = Get.put(BannerImageController());
 
   final Color _primaryColor = const Color(0xFF0A0E21);
-  final Color _secondaryColor = const Color(0xFFFFA726);
-  final Color _cardColor = const Color(0xFFF7F7F7); // Light color for the cards
 
   void _onItemTapped(int index) {
     setState(() {
@@ -126,34 +123,6 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildSearchBar(),
             const SizedBox(height: 16),
             _buildBannerCarousel(),
-            const SizedBox(height: 20),
-            _buildSectionTitle('Featured Books'),
-            const SizedBox(height: 10),
-            _buildFeaturedBooks(),
-            const SizedBox(height: 20),
-            _buildSectionTitle('Recently Published'),
-            const SizedBox(height: 10),
-            _buildRecentlyPublishedBooks(),
-            const SizedBox(height: 20),
-            _buildSectionTitle('Bookmarks'),
-            const SizedBox(height: 10),
-            _buildBookmarks(),
-            const SizedBox(height: 20),
-            _buildSectionTitle('Selected Authors'),
-            const SizedBox(height: 10),
-            _buildHorizontalScroll(
-              items: [
-                _buildAuthorItem('asset/images/img_1.png', 'Author 1'),
-                const SizedBox(width: 10),
-                _buildAuthorItem('asset/images/img_1.png', 'Author 2'),
-                const SizedBox(width: 10),
-                _buildAuthorItem('asset/images/img_1.png', 'Author 3'),
-              ],
-            ),
-            const SizedBox(height: 20),
-            _buildSectionTitle('Categories'),
-            const SizedBox(height: 10),
-            _buildCategories(),
           ],
         ),
       ),
@@ -222,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15.0),
       decoration: BoxDecoration(
-        color: _cardColor,
+        color: const Color(0xFFF7F7F7),
         borderRadius: BorderRadius.circular(20.0),
         boxShadow: [
           BoxShadow(
@@ -289,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [_primaryColor, _secondaryColor],
+          colors: [_primaryColor, const Color(0xFFFFA726)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -342,266 +311,6 @@ class _HomeScreenState extends State<HomeScreen> {
             child: const Text('Subscribe Now'),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: _primaryColor,
-      ),
-    );
-  }
-
-  Widget _buildFeaturedBooks() {
-    return SizedBox(
-      height: 150,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: 10, // Number of featured books
-        itemBuilder: (context, index) {
-          return Container(
-            margin: const EdgeInsets.only(right: 10),
-            width: 100,
-            decoration: BoxDecoration(
-              color: _cardColor,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 2,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      image: const DecorationImage(
-                        image: AssetImage('asset/images/sample_book_cover.png'),
-                        fit: BoxFit.cover,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                const Text(
-                  'Book Title',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildRecentlyPublishedBooks() {
-    return SizedBox(
-      height: 150,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: 10, // Number of recently published books
-        itemBuilder: (context, index) {
-          return Container(
-            margin: const EdgeInsets.only(right: 10),
-            width: 100,
-            decoration: BoxDecoration(
-              color: _cardColor,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 2,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      image: const DecorationImage(
-                        image: AssetImage('asset/images/sample_book_cover.png'),
-                        fit: BoxFit.cover,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                const Text(
-                  'Book Title',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildBookmarks() {
-    return SizedBox(
-      height: 150,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: 10, // Number of bookmarks
-        itemBuilder: (context, index) {
-          return Container(
-            margin: const EdgeInsets.only(right: 10),
-            width: 100,
-            decoration: BoxDecoration(
-              color: _cardColor,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 2,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      image: const DecorationImage(
-                        image: AssetImage('asset/images/sample_book_cover.png'),
-                        fit: BoxFit.cover,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                const Text(
-                  'Book Title',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildAuthorItem(String imagePath, String name) {
-    return Container(
-      width: 100,
-      decoration: BoxDecoration(
-        color: _cardColor,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            spreadRadius: 2,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(imagePath),
-                  fit: BoxFit.cover,
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            name,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHorizontalScroll({required List<Widget> items}) {
-    return SizedBox(
-      height: 150,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: items,
-      ),
-    );
-  }
-
-  Widget _buildCategories() {
-    return SizedBox(
-      height: 100,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: 10, // Number of categories
-        itemBuilder: (context, index) {
-          return Container(
-            margin: const EdgeInsets.only(right: 10),
-            width: 80,
-            decoration: BoxDecoration(
-              color: _cardColor,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 2,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      image: const DecorationImage(
-                        image: AssetImage('asset/images/sample_category_image.png'),
-                        fit: BoxFit.cover,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                const Text(
-                  'Category Name',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          );
-        },
       ),
     );
   }

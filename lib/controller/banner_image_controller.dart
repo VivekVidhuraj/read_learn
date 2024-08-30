@@ -1,4 +1,3 @@
-// banner_image_controller.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:read/model/banner_image_model.dart'; // Adjust this path based on your folder structure
@@ -9,7 +8,7 @@ class BannerImageController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchBannerImages();
+    fetchBannerImages(); // Fetch banner images when the controller is initialized
   }
 
   void fetchBannerImages() async {
@@ -27,7 +26,7 @@ class BannerImageController extends GetxController {
       }
     } catch (e) {
       print("Error fetching banner images: $e");
-      Get.snackbar('Error', 'Could not fetch banner images.');
+      Get.snackbar('Error', 'Could not fetch banner images.'); // Notify the user of the error
     }
   }
 }
