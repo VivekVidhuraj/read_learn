@@ -1,11 +1,11 @@
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthController extends GetxController {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final Rx<User?> _user = Rx<User?>(null);
-
   User? get user => _user.value;
 
   @override
@@ -14,7 +14,7 @@ class AuthController extends GetxController {
     _user.bindStream(_firebaseAuth.authStateChanges());
   }
 
-  Future<User?> login(String email, String password) async {
+  Future<User?> login(String email, String password, {bool rememberMe = false}) async {
     try {
       final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
         email: email,
@@ -24,6 +24,11 @@ class AuthController extends GetxController {
 
       if (user != null) {
         if (user.emailVerified) {
+          if (rememberMe) {
+            await _saveCredentials(email, password);
+          } else {
+            await _clearCredentials();
+          }
           return user;
         } else {
           await _firebaseAuth.signOut();
@@ -35,7 +40,26 @@ class AuthController extends GetxController {
         }
       }
     } on FirebaseAuthException catch (e) {
-      Get.snackbar('Error', _getErrorMessage(e.code),
+      // Log the error code and message
+      print('FirebaseAuthException: ${e.code}');
+      final errorMessage = _getErrorMessage(e.code);
+      if (errorMessage.isNotEmpty) {
+        Get.snackbar('Error', errorMessage,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
+      } else {
+        // Handle cases where the error message is empty
+        Get.snackbar('Error', 'An unexpected error occurred.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
+      }
+      return null;
+    } catch (e) {
+      // Log any non-Firebase errors
+      print('Exception: $e');
+      Get.snackbar('Error', 'An unexpected error occurred.',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white);
@@ -69,10 +93,18 @@ class AuthController extends GetxController {
         Get.offAllNamed('/login'); // Redirect to login page
       }
     } on FirebaseAuthException catch (e) {
-      Get.snackbar('Error', _getErrorMessage(e.code),
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white);
+      final errorMessage = _getErrorMessage(e.code);
+      if (errorMessage.isNotEmpty) {
+        Get.snackbar('Error', errorMessage,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
+      } else {
+        Get.snackbar('Error', 'An unexpected error occurred.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
+      }
     }
   }
 
@@ -88,6 +120,51 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<void> _saveCredentials(String email, String password) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('email', email);
+    await prefs.setString('password', password);
+  }
+
+  Future<void> _clearCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('email');
+    await prefs.remove('password');
+  }
+
+  Future<Map<String, String>?> getSavedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('email');
+    final password = prefs.getString('password');
+    if (email != null && password != null) {
+      return {'email': email, 'password': password};
+    }
+    return null;
+  }
+
+  Future<void> resetPassword(String email) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
+      Get.snackbar('Success', 'Password reset email sent. Check your inbox.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white);
+    } on FirebaseAuthException catch (e) {
+      final errorMessage = _getErrorMessage(e.code);
+      if (errorMessage.isNotEmpty) {
+        Get.snackbar('Error', errorMessage,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
+      } else {
+        Get.snackbar('Error', 'An unexpected error occurred.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
+      }
+    }
+  }
+
   String _getErrorMessage(String errorCode) {
     switch (errorCode) {
       case 'invalid-email':
@@ -97,7 +174,7 @@ class AuthController extends GetxController {
       case 'user-not-found':
         return 'No user found for that email.';
       case 'wrong-password':
-        return 'Wrong password provided for that user.';
+        return 'Invalid email or password.';
       case 'email-already-in-use':
         return 'The account already exists for that email.';
       case 'operation-not-allowed':
@@ -105,7 +182,7 @@ class AuthController extends GetxController {
       case 'weak-password':
         return 'The password is too weak.';
       default:
-        return 'An unknown error occurred.';
+        return ''; // Return an empty string for unknown errors
     }
   }
 }

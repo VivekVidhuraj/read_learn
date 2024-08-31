@@ -1,4 +1,3 @@
-// lib/view/loginscreen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:read/controller/auth_controller.dart';
@@ -15,6 +14,27 @@ class _LoginScreenState extends State<LoginScreen> {
   final RxBool _obscurePassword = true.obs;
   final RxBool _rememberMe = false.obs;
 
+  String? _emailError;
+  String? _passwordError;
+
+  final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCredentials();
+  }
+
+  void _loadSavedCredentials() async {
+    final savedCredentials = await _authController.getSavedCredentials();
+    if (savedCredentials != null) {
+      _emailController.text = savedCredentials['email']!;
+      _passwordController.text = savedCredentials['password']!;
+      _rememberMe.value = true;
+    }
+  }
+
   void _togglePasswordVisibility() {
     _obscurePassword.value = !_obscurePassword.value;
   }
@@ -23,26 +43,69 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
-      Get.snackbar('Error', 'Please enter both email and password',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white);
-      return;
-    }
+    bool isValid = _validateInput(email, password);
 
-    final result = await _authController.login(email, password);
+    if (isValid) {
+      final result = await _authController.login(email, password, rememberMe: _rememberMe.value);
 
-    if (result != null) {
-      // Login successful
-      Get.offAllNamed('/home');
-      Get.snackbar('Success', 'Login successful',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white);
+      if (result != null) {
+        Get.offAllNamed('/home');
+        Get.snackbar('Success', 'Login successful',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white);
+      } else {
+        Get.snackbar('Error', 'Invalid email or password',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
+      }
     } else {
-      // Login failed
-      Get.snackbar('Error', 'Invalid email or password',
+      if (_emailError != null) {
+        FocusScope.of(context).requestFocus(_emailFocusNode);
+      } else if (_passwordError != null) {
+        FocusScope.of(context).requestFocus(_passwordFocusNode);
+      }
+    }
+  }
+
+  bool _validateInput(String email, String password) {
+    bool isValid = true;
+
+    setState(() {
+      if (email.isEmpty || password.isEmpty) {
+        _emailError = email.isEmpty ? 'Email cannot be empty' : null;
+        _passwordError = password.isEmpty ? 'Password cannot be empty' : null;
+        isValid = false;
+      } else {
+        _emailError = _isEmailValid(email) ? null : 'Please enter a valid email address.';
+        _passwordError = _isPasswordValid(password)
+            ? null
+            : 'Password must be 8-12 characters long, include an uppercase letter, a lowercase letter, a number, and a special character.';
+
+        isValid = _emailError == null && _passwordError == null;
+      }
+    });
+
+    return isValid;
+  }
+
+  bool _isEmailValid(String email) {
+    final emailRegex = RegExp(r"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+    return emailRegex.hasMatch(email);
+  }
+
+  bool _isPasswordValid(String password) {
+    final passwordRegex = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$');
+    return passwordRegex.hasMatch(password);
+  }
+
+  void _handleForgotPassword() {
+    final email = _emailController.text.trim();
+    if (email.isNotEmpty) {
+      _authController.resetPassword(email);
+    } else {
+      Get.snackbar('Error', 'Please enter your email to reset password.',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white);
@@ -72,9 +135,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 'Email',
                 _emailController,
                 TextInputType.emailAddress,
+                _emailFocusNode,
+                onChanged: _validateEmail,
               ),
               const SizedBox(height: 16),
-              _buildPasswordField('Password', _passwordController),
+              _buildPasswordField(
+                'Password',
+                _passwordController,
+                _passwordFocusNode,
+                onChanged: _validatePassword,
+              ),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -93,14 +163,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {
-                      // Handle forgot password logic
-                      Get.snackbar('Forgot Password', 'Please follow the instructions sent to your email',
-                          snackPosition: SnackPosition.BOTTOM,
-                          backgroundColor: Colors.blue,
-                          colorText: Colors.white);
-                    },
-                    child: const Text('Forgot Password?'),
+                    onPressed: _handleForgotPassword,
+                    child: const Text(
+                      'Forgot Password?',
+                      style: TextStyle(color: Colors.blue),
+                    ),
                   ),
                 ],
               ),
@@ -108,18 +175,26 @@ class _LoginScreenState extends State<LoginScreen> {
               ElevatedButton(
                 onPressed: _handleLogin,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0A0E21), // Background color of the button
+                  backgroundColor: Colors.black, // Button background color
+                  foregroundColor: Colors.white, // Text color
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text('Login', style: TextStyle(color: Colors.white)),
+                child: const Text('Login'),
               ),
-              TextButton(
-                onPressed: () {
+              const SizedBox(height: 20),
+              GestureDetector(
+                onTap: () {
                   Get.toNamed('/register');
                 },
-                child: const Text('Don\'t have an account? Sign Up'),
+                child: const Text(
+                  'Don\'t have an account? Sign Up',
+                  style: TextStyle(
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
               ),
             ],
           ),
@@ -128,40 +203,66 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, TextInputType inputType) {
+  Widget _buildTextField(String label, TextEditingController controller, TextInputType keyboardType, FocusNode focusNode, {required void Function(String) onChanged}) {
     return TextField(
       controller: controller,
-      keyboardType: inputType,
+      keyboardType: keyboardType,
+      focusNode: focusNode,
+      textInputAction: TextInputAction.next,
+      onEditingComplete: () {
+        onChanged(controller.text);
+        FocusScope.of(context).nextFocus();
+      },
+      onChanged: (text) => onChanged(text),
       decoration: InputDecoration(
         labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: OutlineInputBorder(),
+        errorText: _emailError, // Only used for email field
       ),
     );
   }
 
-  Widget _buildPasswordField(String label, TextEditingController controller) {
+  Widget _buildPasswordField(String label, TextEditingController controller, FocusNode focusNode, {required void Function(String) onChanged}) {
     return Obx(
           () => TextField(
         controller: controller,
+        focusNode: focusNode,
         obscureText: _obscurePassword.value,
+        textInputAction: TextInputAction.done,
+        onEditingComplete: () {
+          if (_isPasswordValid(controller.text)) {
+            _handleLogin();
+          } else {
+            _validatePassword(controller.text);
+          }
+        },
+        onChanged: (text) => onChanged(text),
         decoration: InputDecoration(
           labelText: label,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          border: OutlineInputBorder(),
           suffixIcon: IconButton(
             icon: Icon(
-              _obscurePassword.value ? Icons.visibility : Icons.visibility_off,
-              color: Colors.grey,
+              _obscurePassword.value ? Icons.visibility_off : Icons.visibility,
             ),
             onPressed: _togglePasswordVisibility,
           ),
+          errorText: _passwordError, // Only used for password field
         ),
       ),
     );
+  }
+
+  void _validateEmail(String email) {
+    setState(() {
+      _emailError = _isEmailValid(email) ? null : 'Please enter a valid email address.';
+    });
+  }
+
+  void _validatePassword(String password) {
+    setState(() {
+      _passwordError = _isPasswordValid(password)
+          ? null
+          : 'Password must be 8-12 characters long, include an uppercase letter, a lowercase letter, a number, and a special character.';
+    });
   }
 }
