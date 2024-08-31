@@ -1,5 +1,5 @@
-import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
 import '../model/book_model.dart';
 import '../controller/auth_controller.dart'; // Import AuthController
 
@@ -13,7 +13,7 @@ class BookController extends GetxController {
     fetchRecentlyPublishedBooks();
   }
 
-  void fetchRecentlyPublishedBooks() async {
+  Future<void> fetchRecentlyPublishedBooks() async {
     try {
       final currentUserId = _authController.user?.uid; // Get the current user's ID
 
@@ -37,11 +37,11 @@ class BookController extends GetxController {
 
       // Convert documents to Book objects
       final normalBooks = normalBooksSnapshot.docs
-          .map((doc) => Book.fromDocument(doc))
+          .map((doc) => Book.fromDocument(doc, isNormalBook: true))
           .toList();
 
       final premiumBooks = premiumBooksSnapshot.docs
-          .map((doc) => Book.fromDocument(doc))
+          .map((doc) => Book.fromDocument(doc, isNormalBook: false))
           .toList();
 
       // Combine both lists and sort by your preferred criteria, if needed

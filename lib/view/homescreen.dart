@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:read/controller/banner_image_controller.dart';
 import 'package:read/controller/auth_controller.dart';
-import 'package:read/view/my_books_page.dart';
+import 'package:read/view/selected_book_screen.dart';
 
 import '../controller/book_controller.dart'; // Import the new page
 
@@ -369,64 +369,12 @@ class _HomeScreenState extends State<HomeScreen> {
         scrollDirection: Axis.horizontal,
         itemCount: 10, // Number of featured books
         itemBuilder: (context, index) {
-          return Container(
-            margin: const EdgeInsets.only(right: 10),
-            width: 100,
-            decoration: BoxDecoration(
-              color: _cardColor,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 2,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      // image: const DecorationImage(
-                      //   image: AssetImage('asset/images/sample_book_cover.png'),
-                      //   fit: BoxFit.cover,
-                      // ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                const Text(
-                  'Book Title',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-  Widget _buildRecentlyPublishedBooks() {
-    return Obx(() {
-      // Check if the list is empty
-      if (_bookController.recentlyPublishedBooks.isEmpty) {
-        return const Center(child: CircularProgressIndicator());
-      }
-
-      return SizedBox(
-        height: 150,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: _bookController.recentlyPublishedBooks.length, // Use the length of the books list
-          itemBuilder: (context, index) {
-            final book = _bookController.recentlyPublishedBooks[index]; // Get the book from the list
-
-            return Container(
+          return GestureDetector(
+            onTap: () {
+              // Pass the book ID or the book object to the BookDetailsView
+              Get.to(() => BookDetailsView(bookId: 'featured_book_id_$index')); // Adjust based on how you manage book IDs
+            },
+            child: Container(
               margin: const EdgeInsets.only(right: 10),
               width: 100,
               decoration: BoxDecoration(
@@ -447,21 +395,85 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage(book.coverUrl), // Use the book cover URL
-                          fit: BoxFit.cover,
-                        ),
+                        // image: const DecorationImage(
+                        //   image: AssetImage('asset/images/sample_book_cover.png'),
+                        //   fit: BoxFit.cover,
+                        // ),
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   ),
                   const SizedBox(height: 5),
-                  Text(
-                    book.name, // Use the book name
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  const Text(
+                    'Book Title',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                 ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildRecentlyPublishedBooks() {
+    return Obx(() {
+      if (_bookController.recentlyPublishedBooks.isEmpty) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      return SizedBox(
+        height: 150,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: _bookController.recentlyPublishedBooks.length,
+          itemBuilder: (context, index) {
+            final book = _bookController.recentlyPublishedBooks[index];
+
+            return GestureDetector(
+              onTap: () {
+                // Pass the book ID or the book object to the BookDetailsView
+                Get.to(() => BookDetailsView(bookId: book.bookId)); // Adjust based on how you manage book IDs
+              },
+              child: Container(
+                margin: const EdgeInsets.only(right: 10),
+                width: 100,
+                decoration: BoxDecoration(
+                  color: _cardColor,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.3),
+                      spreadRadius: 2,
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: NetworkImage(book.coverUrl),
+                            fit: BoxFit.cover,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      book.name,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
             );
           },
@@ -469,6 +481,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     });
   }
+
 
   Widget _buildBookmarks() {
     return SizedBox(
