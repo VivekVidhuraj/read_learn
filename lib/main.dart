@@ -6,11 +6,14 @@ import 'package:read/controller/auth_controller.dart';
 import 'package:read/controller/banner_image_controller.dart';
 import 'package:read/view/homescreen.dart';
 import 'package:read/view/loginscreen.dart';
-
+import 'package:read/view/profile_view.dart';
 import 'package:read/view/signup.dart';
 import 'package:read/view/splashscreen.dart';
 import 'package:read/view/upload_book_view.dart';
-import 'package:read/view/my_books_page.dart'; // Import the new page
+import 'package:read/view/my_books_page.dart';
+
+
+// Import the new VerifyEmailScreen
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,8 +42,10 @@ class MyApp extends StatelessWidget {
           GetPage(name: '/home', page: () => HomeScreen()),
           GetPage(name: '/login', page: () => LoginScreen()),
           GetPage(name: '/register', page: () => SignUpScreen()),
-          GetPage(name: '/uploadbook', page: () => UploadBookView()),
-          GetPage(name: '/mybooks', page: () => MyBooksPage()), // Add new route
+         GetPage(name: '/uploadbook', page: () => UploadBookView()),
+          GetPage(name: '/mybooks', page: () => MyBooksPage()),
+          GetPage(name: '/profile', page: () => ProfileManagementPage()),// Add new route
+           // Add new route
         ],
       ),
     );

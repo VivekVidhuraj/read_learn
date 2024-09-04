@@ -1,12 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart'; // Import Razorpay
 import 'package:read/controller/book_detail_controller.dart';
-import 'package:read/view/pdfviewscreen.dart'; // Import PdfViewerScreen
+import 'package:read/view/pdfviewscreen.dart';
 
 class BookDetailsView extends StatelessWidget {
   final String bookId;
+  late Razorpay _razorpay; // Declare Razorpay instance
 
-  BookDetailsView({required this.bookId});
+  BookDetailsView({required this.bookId}) {
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    final controller = Get.find<BookDetailsController>();
+    controller.markBookAsPurchased(); // Mark the book as purchased
+    Get.snackbar('Payment Success', 'Payment was successful');
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    Get.snackbar('Payment Error', 'Payment failed: ${response.message}');
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    Get.snackbar('External Wallet', 'External Wallet used: ${response.walletName}');
+  }
+
+  void _initiatePayment(double amount) {
+    var options = {
+      'key': 'rzp_test_cDa0MyUrUlSnWd',
+      'amount': amount * 100, // Convert amount to paise
+      'name': 'Book Purchase',
+      'description': 'Purchase of premium book',
+      'prefill': {
+        'contact': '1234567890',
+        'email': 'test@example.com',
+      },
+    };
+
+    try {
+      _razorpay.open(options);
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +64,8 @@ class BookDetailsView extends StatelessWidget {
       ),
       body: Obx(() {
         final book = controller.book.value;
+        final isBookPurchased = controller.isBookPurchased.value;
+
         if (book == null) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -61,7 +103,7 @@ class BookDetailsView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Price: \$${book.price.toStringAsFixed(2)}',
+                'Price: ₹${book.price.toStringAsFixed(2)}',
                 style: const TextStyle(
                   fontSize: 20,
                   color: Color(0xFF0A0E21),
@@ -103,36 +145,19 @@ class BookDetailsView extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 onPressed: () {
-                  if (book.isNormalBook) {
-                    // Display PDF reader
+                  if (book.isNormalBook || isBookPurchased) {
                     if (book.pdfUrl.isNotEmpty) {
-                      // Open PDF reader using the PDF URL
                       Get.to(() => PdfViewerScreen(pdfUrl: book.pdfUrl));
                     } else {
-                      // Handle case where PDF URL is not available
                       Get.snackbar('Error', 'PDF not available for this book.');
                     }
                   } else {
-                    // Show an alert dialog to inform about the premium subscription
-                    Get.defaultDialog(
-                      title: 'Premium Subscription Required',
-                      middleText: 'This book is available only for premium subscribers. Please subscribe to access this book.',
-                      textConfirm: 'Subscribe',
-                      textCancel: 'Cancel',
-                      confirmTextColor: Colors.white,
-                      onConfirm: () {
-                        // Handle the subscription logic or show a message
-                        Get.snackbar('Premium Subscription', 'Please visit our subscription page to subscribe.');
-                      },
-                      onCancel: () {
-                        // Handle cancel action if needed
-                      },
-                    );
+                    _initiatePayment(book.price);
                   }
                 },
-                child: const Text(
-                  'Read Book',
-                  style: TextStyle(fontSize: 18),
+                child: Text(
+                  isBookPurchased || book.isNormalBook ? 'Read Book' : 'Buy and Read',
+                  style: const TextStyle(fontSize: 18),
                 ),
               ),
             ],

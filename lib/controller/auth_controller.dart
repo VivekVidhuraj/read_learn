@@ -1,10 +1,17 @@
+import 'dart:io';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image/image.dart' as img;
+import 'package:path/path.dart' as path;
 
 class AuthController extends GetxController {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Rx<User?> _user = Rx<User?>(null);
   User? get user => _user.value;
 
@@ -24,12 +31,23 @@ class AuthController extends GetxController {
 
       if (user != null) {
         if (user.emailVerified) {
-          if (rememberMe) {
-            await _saveCredentials(email, password);
+          final userDoc = await _firestore.collection('users').doc(user.uid).get();
+
+          if (userDoc.exists) {
+            if (rememberMe) {
+              await _saveCredentials(email, password);
+            } else {
+              await _clearCredentials();
+            }
+            return user;
           } else {
-            await _clearCredentials();
+            await _firebaseAuth.signOut();
+            Get.snackbar('Error', 'User data not found in the database.',
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.red,
+                colorText: Colors.white);
+            return null;
           }
-          return user;
         } else {
           await _firebaseAuth.signOut();
           Get.snackbar('Error', 'Please verify your email address.',
@@ -40,7 +58,6 @@ class AuthController extends GetxController {
         }
       }
     } on FirebaseAuthException catch (e) {
-      // Log the error code and message
       print('FirebaseAuthException: ${e.code}');
       final errorMessage = _getErrorMessage(e.code);
       if (errorMessage.isNotEmpty) {
@@ -48,26 +65,15 @@ class AuthController extends GetxController {
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.red,
             colorText: Colors.white);
-      } else {
-        // Handle cases where the error message is empty
-        Get.snackbar('Error', 'An unexpected error occurred.',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white);
       }
       return null;
     } catch (e) {
-      // Log any non-Firebase errors
       print('Exception: $e');
-      Get.snackbar('Error', 'An unexpected error occurred.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white);
       return null;
     }
   }
 
-  Future<void> signUp(String email, String password, String confirmPassword) async {
+  Future<void> signUp(String username, String email, String password, String confirmPassword) async {
     if (password != confirmPassword) {
       Get.snackbar('Error', 'Passwords do not match.',
           snackPosition: SnackPosition.BOTTOM,
@@ -84,23 +90,26 @@ class AuthController extends GetxController {
 
       final user = userCredential.user;
       if (user != null) {
-        // Send email verification
+        await user.updateProfile(displayName: username);
+
+        await _firestore.collection('users').doc(user.uid).set({
+          'username': username,
+          'email': email,
+          'profilePicture': '', // Default profile picture URL or empty string
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+
         await user.sendEmailVerification();
         Get.snackbar('Success', 'Verification email sent. Please check your inbox.',
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.green,
             colorText: Colors.white);
-        Get.offAllNamed('/login'); // Redirect to login page
+        Get.offAllNamed('/login');
       }
     } on FirebaseAuthException catch (e) {
       final errorMessage = _getErrorMessage(e.code);
       if (errorMessage.isNotEmpty) {
         Get.snackbar('Error', errorMessage,
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white);
-      } else {
-        Get.snackbar('Error', 'An unexpected error occurred.',
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.red,
             colorText: Colors.white);
@@ -111,7 +120,7 @@ class AuthController extends GetxController {
   Future<void> signOut() async {
     try {
       await _firebaseAuth.signOut();
-      Get.offAllNamed('/login'); // Redirect to login page
+      Get.offAllNamed('/login');
     } catch (e) {
       Get.snackbar('Error', 'Failed to sign out.',
           snackPosition: SnackPosition.BOTTOM,
@@ -156,12 +165,48 @@ class AuthController extends GetxController {
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.red,
             colorText: Colors.white);
-      } else {
-        Get.snackbar('Error', 'An unexpected error occurred.',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white);
       }
+    }
+  }
+
+  Future<void> updateProfilePicture(String imagePath) async {
+    final File imageFile = File(imagePath);
+
+    // Read the image file
+    final img.Image? image = img.decodeImage(imageFile.readAsBytesSync());
+
+    if (image != null) {
+      // Define desired width and height
+      const int targetWidth = 200;
+      const int targetHeight = 200;
+
+      // Resize the image
+      final img.Image resizedImage = img.copyResize(image, width: targetWidth, height: targetHeight);
+
+      // Convert resized image back to file
+      final List<int> resizedImageBytes = img.encodeJpg(resizedImage);
+      final File resizedImageFile = File(imageFile.path)..writeAsBytesSync(resizedImageBytes);
+
+      // Upload the resized image to Firebase Storage
+      String fileName = path.basename(imageFile.path);
+      firebase_storage.Reference storageRef = firebase_storage.FirebaseStorage.instance.ref().child('profile_pictures/$fileName');
+      firebase_storage.UploadTask uploadTask = storageRef.putFile(resizedImageFile);
+      await uploadTask;
+
+      // Get the download URL
+      String downloadURL = await storageRef.getDownloadURL();
+
+      // Update the user's photo URL in Firebase Authentication
+      User? user = FirebaseAuth.instance.currentUser;
+      await user!.updatePhotoURL(downloadURL);
+
+      // Update the photo URL in Firestore
+      await _firestore.collection('users').doc(user.uid).update({
+        'profilePicture': downloadURL,
+      });
+
+      // Refresh the user data
+      _user.value = FirebaseAuth.instance.currentUser;
     }
   }
 
@@ -182,7 +227,7 @@ class AuthController extends GetxController {
       case 'weak-password':
         return 'The password is too weak.';
       default:
-        return ''; // Return an empty string for unknown errors
+        return 'An unexpected error occurred.';
     }
   }
 }

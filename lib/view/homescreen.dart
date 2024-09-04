@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -40,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
         // Handle Bookmarks navigation
           break;
         case 3:
-        // Handle Profile navigation
+        Get.toNamed('/profile');
           break;
       }
     });
@@ -105,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     backgroundColor: Colors.white,
                     child: ClipOval(
                       child: Image.asset(
-                        'asset/images/img_3.png',
+                        'asset/images/user.jpg',
                         fit: BoxFit.cover,
                         width: 90,
                         height: 90,
@@ -252,9 +251,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return [
       ListTile(
         leading: const Icon(Icons.home),
-        title: const Text('Home'),
+        title: const Text('Profile'),
         onTap: () {
-          Get.toNamed('/home');
+          Get.toNamed('/profile');
         },
       ),
       ListTile(
@@ -512,8 +511,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       //image: const DecorationImage(
-                        //image: AssetImage('asset/images/sample_book_cover.png'),
-                       // fit: BoxFit.cover,
+                      //image: AssetImage('asset/images/sample_book_cover.png'),
+                      // fit: BoxFit.cover,
                       //),
                       borderRadius: BorderRadius.circular(10),
                     ),

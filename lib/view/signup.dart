@@ -9,6 +9,7 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final AuthController _authController = Get.find<AuthController>();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
@@ -16,10 +17,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final RxBool _obscurePassword = true.obs;
   final RxBool _obscureConfirmPassword = true.obs;
 
+  final FocusNode _usernameFocusNode = FocusNode();
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
   final FocusNode _confirmPasswordFocusNode = FocusNode();
 
+  String? _usernameError;
   String? _emailError;
   String? _passwordError;
   String? _confirmPasswordError;
@@ -33,17 +36,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _handleSignUp() async {
+    final username = _usernameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
-    bool isValid = _validateInput(email, password, confirmPassword);
+    bool isValid = _validateInput(username, email, password, confirmPassword);
 
     if (isValid) {
-      await _authController.signUp(email, password, confirmPassword);
+      await _authController.signUp(username, email, password, confirmPassword);
     } else {
       // Focus on the first field with an error
-      if (_emailError != null) {
+      if (_usernameError != null) {
+        FocusScope.of(context).requestFocus(_usernameFocusNode);
+      } else if (_emailError != null) {
         FocusScope.of(context).requestFocus(_emailFocusNode);
       } else if (_passwordError != null) {
         FocusScope.of(context).requestFocus(_passwordFocusNode);
@@ -53,10 +59,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  bool _validateInput(String email, String password, String confirmPassword) {
+
+  bool _validateInput(String username, String email, String password, String confirmPassword) {
     bool isValid = true;
 
     setState(() {
+      if (username.isEmpty) {
+        _usernameError = 'Username cannot be empty';
+        isValid = false;
+      } else if (!_isUsernameValid(username)) {
+        _usernameError = 'Username must start with an uppercase letter and only contain letters and whitespace.';
+        isValid = false;
+      } else {
+        _usernameError = null;
+      }
+
       if (password.isEmpty) {
         _passwordError = 'Password cannot be empty';
         isValid = false;
@@ -94,55 +111,64 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return passwordRegex.hasMatch(password);
   }
 
+  bool _isUsernameValid(String username) {
+    final usernameRegex = RegExp(r'^[A-Z][A-Za-z\s]*$');
+    return usernameRegex.hasMatch(username);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Sign Up',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 20),
-              _buildTextField('Email', _emailController, TextInputType.emailAddress, _emailFocusNode, onChanged: _validateEmail),
-              const SizedBox(height: 16),
-              _buildPasswordField('Password', _passwordController, _passwordFocusNode, onChanged: _validatePassword),
-              const SizedBox(height: 16),
-              _buildPasswordField('Confirm Password', _confirmPasswordController, _confirmPasswordFocusNode, isConfirmPassword: true, onChanged: _validateConfirmPassword),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _handleSignUp,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0A0E21),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+      body: SafeArea( // Added SafeArea
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Sign Up',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
                 ),
-                child: const Text('Sign Up', style: TextStyle(color: Colors.white)),
-              ),
-              TextButton(
-                onPressed: () {
-                  Get.toNamed('/login');
-                },
-                child: const Text('Already have an account? Login'),
-              ),
-            ],
+                const SizedBox(height: 20),
+                _buildTextField('Username', _usernameController, TextInputType.text, _usernameFocusNode, onChanged: _validateUsername, errorText: _usernameError),
+                const SizedBox(height: 16),
+                _buildTextField('Email', _emailController, TextInputType.emailAddress, _emailFocusNode, onChanged: _validateEmail, errorText: _emailError),
+                const SizedBox(height: 16),
+                _buildPasswordField('Password', _passwordController, _passwordFocusNode, onChanged: _validatePassword),
+                const SizedBox(height: 16),
+                _buildPasswordField('Confirm Password', _confirmPasswordController, _confirmPasswordFocusNode, isConfirmPassword: true, onChanged: _validateConfirmPassword),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _handleSignUp,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0A0E21),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Sign Up', style: TextStyle(color: Colors.white)),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Get.toNamed('/login');
+                  },
+                  child: const Text('Already have an account? Login'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, TextInputType inputType, FocusNode focusNode, {void Function(String)? onChanged}) {
+  Widget _buildTextField(String label, TextEditingController controller, TextInputType inputType, FocusNode focusNode, {void Function(String)? onChanged, String? errorText}) {
     return TextField(
       controller: controller,
       keyboardType: inputType,
@@ -165,10 +191,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
           borderRadius: BorderRadius.circular(10),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        errorText: _emailError, // Only used for email field
+        errorText: errorText,
       ),
     );
   }
+
 
   Widget _buildPasswordField(String label, TextEditingController controller, FocusNode focusNode, {bool isConfirmPassword = false, required void Function(String) onChanged}) {
     return Obx(
@@ -208,6 +235,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
       ),
     );
+  }
+
+  void _validateUsername(String username) {
+    setState(() {
+      _usernameError = _isUsernameValid(username) ? null : 'Username must start with an uppercase letter and only contain letters and whitespace.';
+    });
   }
 
   void _validateEmail(String email) {

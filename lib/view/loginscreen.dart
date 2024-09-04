@@ -50,10 +50,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (result != null) {
         Get.offAllNamed('/home');
-        Get.snackbar('Success', 'Login successful',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.green,
-            colorText: Colors.white);
+        // Get.snackbar('Success', 'Login successful',
+        //     snackPosition: SnackPosition.BOTTOM,
+        //     backgroundColor: Colors.green,
+        //     colorText: Colors.white);
       } else {
         Get.snackbar('Error', 'Invalid email or password',
             snackPosition: SnackPosition.BOTTOM,
@@ -73,17 +73,24 @@ class _LoginScreenState extends State<LoginScreen> {
     bool isValid = true;
 
     setState(() {
-      if (email.isEmpty || password.isEmpty) {
-        _emailError = email.isEmpty ? 'Email cannot be empty' : null;
-        _passwordError = password.isEmpty ? 'Password cannot be empty' : null;
+      if (email.isEmpty) {
+        _emailError = 'Email cannot be empty';
+        isValid = false;
+      } else if (!_isEmailValid(email)) {
+        _emailError = 'Please enter a valid email address.';
         isValid = false;
       } else {
-        _emailError = _isEmailValid(email) ? null : 'Please enter a valid email address.';
-        _passwordError = _isPasswordValid(password)
-            ? null
-            : 'Password must be 8-12 characters long, include an uppercase letter, a lowercase letter, a number, and a special character.';
+        _emailError = null;
+      }
 
-        isValid = _emailError == null && _passwordError == null;
+      if (password.isEmpty) {
+        _passwordError = 'Password cannot be empty';
+        isValid = false;
+      } else if (!_isPasswordValid(password)) {
+        _passwordError = 'Password must be 8-12 characters long, include an uppercase letter, a lowercase letter, a number, and a special character.';
+        isValid = false;
+      } else {
+        _passwordError = null;
       }
     });
 
