@@ -39,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
         // Handle Bookmarks navigation
           break;
         case 3:
-        Get.toNamed('/profile');
+          Get.toNamed('/profile');
           break;
       }
     });
@@ -131,10 +131,10 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 16),
             _buildBannerCarousel(),
             const SizedBox(height: 20),
-            _buildSectionTitle('Featured Books'),
-            const SizedBox(height: 10),
-            _buildFeaturedBooks(),
-            const SizedBox(height: 20),
+            //_buildSectionTitle('Featured Books'),
+           // const SizedBox(height: 10),
+            //_buildFeaturedBooks(),
+         //   const SizedBox(height: 20),
             _buildSectionTitle('Recently Published'),
             const SizedBox(height: 10),
             _buildRecentlyPublishedBooks(),
@@ -154,10 +154,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 _buildAuthorItem('asset/images/img_1.png', 'Author 3'),
               ],
             ),
-            const SizedBox(height: 20),
-            _buildSectionTitle('Categories'),
-            const SizedBox(height: 10),
-            _buildCategories(),
+            //const SizedBox(height: 20),
+           // _buildSectionTitle('Categories'),
+          //  const SizedBox(height: 10),
+          //  _buildCategories(),
           ],
         ),
       ),
@@ -250,10 +250,10 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Widget> _buildDrawerItems() {
     return [
       ListTile(
-        leading: const Icon(Icons.home),
-        title: const Text('Profile'),
+        leading: const Icon(Icons.notifications),
+        title: const Text('Notification'),
         onTap: () {
-          Get.toNamed('/profile');
+          Get.toNamed('/notification');
         },
       ),
       ListTile(
@@ -361,61 +361,61 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildFeaturedBooks() {
-    return SizedBox(
-      height: 150,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: 10, // Number of featured books
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () {
-              // Pass the book ID or the book object to the BookDetailsView
-              Get.to(() => BookDetailsView(bookId: 'featured_book_id_$index')); // Adjust based on how you manage book IDs
-            },
-            child: Container(
-              margin: const EdgeInsets.only(right: 10),
-              width: 100,
-              decoration: BoxDecoration(
-                color: _cardColor,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    spreadRadius: 2,
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        // image: const DecorationImage(
-                        //   image: AssetImage('asset/images/sample_book_cover.png'),
-                        //   fit: BoxFit.cover,
-                        // ),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  const Text(
-                    'Book Title',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
+  // Widget _buildFeaturedBooks() {
+  //   return SizedBox(
+  //     height: 150,
+  //     child: ListView.builder(
+  //       scrollDirection: Axis.horizontal,
+  //       itemCount: 10, // Number of featured books
+  //       itemBuilder: (context, index) {
+  //         return GestureDetector(
+  //           onTap: () {
+  //             // Pass the book ID or the book object to the BookDetailsView
+  //             Get.to(() => BookDetailsView(bookId: 'featured_book_id_$index')); // Adjust based on how you manage book IDs
+  //           },
+  //           child: Container(
+  //             margin: const EdgeInsets.only(right: 10),
+  //             width: 100,
+  //             decoration: BoxDecoration(
+  //               color: _cardColor,
+  //               borderRadius: BorderRadius.circular(10),
+  //               boxShadow: [
+  //                 BoxShadow(
+  //                   color: Colors.grey.withOpacity(0.3),
+  //                   spreadRadius: 2,
+  //                   blurRadius: 4,
+  //                   offset: const Offset(0, 2),
+  //                 ),
+  //               ],
+  //             ),
+  //             child: Column(
+  //               crossAxisAlignment: CrossAxisAlignment.center,
+  //               children: [
+  //                 Expanded(
+  //                   child: Container(
+  //                     decoration: BoxDecoration(
+  //                       // image: const DecorationImage(
+  //                       //   image: AssetImage('asset/images/sample_book_cover.png'),
+  //                       //   fit: BoxFit.cover,
+  //                       // ),
+  //                       borderRadius: BorderRadius.circular(10),
+  //                     ),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 5),
+  //                 const Text(
+  //                   'Book Title',
+  //                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+  //                   textAlign: TextAlign.center,
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         );
+  //       },
+  //     ),
+  //   );
+  // }
 
   Widget _buildRecentlyPublishedBooks() {
     return Obx(() {
@@ -442,27 +442,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: BoxDecoration(
                   color: _cardColor,
                   borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.3),
-                      spreadRadius: 2,
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  // Removed the boxShadow property
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: NetworkImage(book.coverUrl),
-                            fit: BoxFit.cover,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
+                    Container(
+                      height: 100, // Set a fixed height for the image container
+                      width: double.infinity, // Make the image container fill the available width
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: NetworkImage(book.coverUrl),
+                          fit: BoxFit.cover, // Ensure the image covers the entire container
                         ),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                     const SizedBox(height: 5),
@@ -480,6 +473,8 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     });
   }
+
+
 
 
   Widget _buildBookmarks() {
@@ -581,53 +576,53 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCategories() {
-    return SizedBox(
-      height: 100,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: 10, // Number of categories
-        itemBuilder: (context, index) {
-          return Container(
-            margin: const EdgeInsets.only(right: 10),
-            width: 80,
-            decoration: BoxDecoration(
-              color: _cardColor,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 2,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      image: const DecorationImage(
-                        image: AssetImage('asset/images/sample_category_image.png'),
-                        fit: BoxFit.cover,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                const Text(
-                  'Category Name',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
+  // Widget _buildCategories() {
+  //   return SizedBox(
+  //     height: 100,
+  //     child: ListView.builder(
+  //       scrollDirection: Axis.horizontal,
+  //       itemCount: 10, // Number of categories
+  //       itemBuilder: (context, index) {
+  //         return Container(
+  //           margin: const EdgeInsets.only(right: 10),
+  //           width: 80,
+  //           decoration: BoxDecoration(
+  //             color: _cardColor,
+  //             borderRadius: BorderRadius.circular(10),
+  //             boxShadow: [
+  //               BoxShadow(
+  //                 color: Colors.grey.withOpacity(0.3),
+  //                 spreadRadius: 2,
+  //                 blurRadius: 4,
+  //                 offset: const Offset(0, 2),
+  //               ),
+  //             ],
+  //           ),
+  //           child: Column(
+  //             mainAxisAlignment: MainAxisAlignment.center,
+  //             children: [
+  //               Expanded(
+  //                 child: Container(
+  //                   decoration: BoxDecoration(
+  //                     image: const DecorationImage(
+  //                       image: AssetImage('asset/images/sample_category_image.png'),
+  //                       fit: BoxFit.cover,
+  //                     ),
+  //                     borderRadius: BorderRadius.circular(10),
+  //                   ),
+  //                 ),
+  //               ),
+  //               const SizedBox(height: 5),
+  //               const Text(
+  //                 'Category Name',
+  //                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+  //                 textAlign: TextAlign.center,
+  //               ),
+  //             ],
+  //           ),
+  //         );
+  //       },
+  //     ),
+  //   );
+  // }
 }
