@@ -442,10 +442,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final _scrollProgress = Rx<double>(0.0); // Add this at the top of your state class
 
-
-
-
-
   Widget _buildBookItem(Book book) {
     return GestureDetector(
       onTap: () {
