@@ -169,6 +169,35 @@ class AuthController extends GetxController {
       }
     }
   }
+  Future<void> updateUserName(String newName) async {
+    try {
+      User? currentUser = _firebaseAuth.currentUser;
+      if (currentUser != null) {
+        // Update the user's display name in Firebase Authentication
+        await currentUser.updateProfile(displayName: newName);
+
+        // Update the user's username in Firestore
+        await _firestore.collection('users').doc(currentUser.uid).update({
+          'username': newName,
+        });
+
+        // Refresh the user data
+        await currentUser.reload();
+        _user.value = _firebaseAuth.currentUser;
+
+        Get.snackbar('Success', 'Username updated successfully.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white);
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update username.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white);
+    }
+  }
+
 
   Future<void> updateProfilePicture(String imagePath) async {
     final File imageFile = File(imagePath);

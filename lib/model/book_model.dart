@@ -10,8 +10,9 @@ class Book {
   final String userId;
   final String description;
   final int pageCount;
-  final bool isNormalBook; // New field
-  final String pdfUrl; // New field
+  final bool isNormalBook;
+  final String pdfUrl;
+  double? rating; // Add this field for rating
 
   Book({
     required this.bookId,
@@ -23,8 +24,9 @@ class Book {
     required this.userId,
     required this.description,
     required this.pageCount,
-    required this.isNormalBook, // Initialize this field
-    required this.pdfUrl, // Initialize this field
+    required this.isNormalBook,
+    required this.pdfUrl,
+    this.rating, // Initialize this field
   });
 
   factory Book.fromDocument(DocumentSnapshot doc, {required bool isNormalBook}) {
@@ -39,8 +41,9 @@ class Book {
       userId: data['user_id'] ?? '',
       description: data['description'] ?? '',
       pageCount: data['page_count'] ?? 0,
-      isNormalBook: isNormalBook, // Set this value
-      pdfUrl: data['pdf_url'] ?? '', // Make sure to add pdf_url to Firestore documents
+      isNormalBook: isNormalBook,
+      pdfUrl: data['pdf_url'] ?? '',
+      rating: (data['rating'] ?? 0.0).toDouble(), // Initialize the rating
     );
   }
 }

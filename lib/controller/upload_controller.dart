@@ -1,4 +1,3 @@
-
 import 'dart:io'; // Import for File
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart'; // For FilePicker
@@ -78,6 +77,21 @@ class UploadController extends GetxController {
     }
   }
 
+  Future<void> sendNotification(String bookName) async {
+    try {
+      final notification = {
+        'title': 'New Book Uploaded',
+        'body': 'A new book "$bookName" has been uploaded!',
+        'timestamp': Timestamp.now(),
+      };
+
+      // Store the notification in a Firestore collection
+      await FirebaseFirestore.instance.collection('notifications').add(notification);
+    } catch (e) {
+      print('Error sending notification: $e');
+    }
+  }
+
   Future<void> uploadBook() async {
     if (nameController.text.isEmpty || authorController.text.isEmpty || priceController.text.isEmpty || descriptionController.text.isEmpty) {
       Get.snackbar('Error', 'Please fill in all fields',
@@ -133,6 +147,9 @@ class UploadController extends GetxController {
         'created_at': Timestamp.now(),
         'user_id': userId, // Add user ID
       });
+
+      // Send notification to other users
+      await sendNotification(nameController.text);
 
       Get.snackbar('Success', 'Book uploaded successfully',
           backgroundColor: Color(0xFF0A0E21),

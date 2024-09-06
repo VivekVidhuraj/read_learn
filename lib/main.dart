@@ -11,6 +11,7 @@ import 'package:read/view/noticiation.dart';
 
 import 'package:read/view/profile_view.dart';
 import 'package:read/view/purchased_book.dart';
+import 'package:read/view/reading_history_page.dart';
 import 'package:read/view/signup.dart';
 import 'package:read/view/splashscreen.dart';
 import 'package:read/view/upload_book_view.dart';
@@ -52,6 +53,7 @@ class MyApp extends StatelessWidget {
           GetPage(name: '/notification', page: () => NotificationPage()),
           GetPage(name: '/purchasedbook', page: () => PurchasedBooksView()),
           GetPage(name: '/favorite', page: () => FavoritesPage()),
+          GetPage(name: '/history', page: () => ReadingHistoryPage()),
 
           // Add new route
            // Add new route

@@ -6,8 +6,8 @@ import '../model/book_model.dart';
 class BookDetailsController extends GetxController {
   final String bookId;
   var book = Rxn<Book>();
-  var isBookPurchased = false.obs; // Track if the book is purchased
-  var isFavorite = false.obs; // Track if the book is a favorite
+  var isBookPurchased = false.obs;
+  var isFavorite = false.obs;
 
   BookDetailsController({required this.bookId});
 
@@ -15,13 +15,12 @@ class BookDetailsController extends GetxController {
   void onInit() {
     super.onInit();
     fetchBookDetails();
-    checkIfBookPurchased(); // Check if the book has been purchased
-    checkIfBookFavorite(); // Check if the book is marked as favorite
+    checkIfBookPurchased();
+    checkIfBookFavorite();
   }
 
   Future<void> fetchBookDetails() async {
     try {
-      // First, try to fetch from 'normal_books'
       final normalBookSnapshot = await FirebaseFirestore.instance
           .collection('normal_books')
           .doc(bookId)
@@ -32,7 +31,6 @@ class BookDetailsController extends GetxController {
         return;
       }
 
-      // If not found in 'normal_books', try to fetch from 'premium_books'
       final premiumBookSnapshot = await FirebaseFirestore.instance
           .collection('premium_books')
           .doc(bookId)
@@ -41,7 +39,6 @@ class BookDetailsController extends GetxController {
       if (premiumBookSnapshot.exists) {
         book.value = Book.fromDocument(premiumBookSnapshot, isNormalBook: false);
       } else {
-        // Handle the case where the book is not found in either collection
         print('Book not found in both collections');
       }
     } catch (e) {
@@ -115,7 +112,7 @@ class BookDetailsController extends GetxController {
           .set({'added_at': Timestamp.now()});
       isFavorite.value = true;
     } catch (e) {
-      print('Error adding book to favorites: $e');
+      print('Error adding to favorites: $e');
     }
   }
 
@@ -132,7 +129,7 @@ class BookDetailsController extends GetxController {
           .delete();
       isFavorite.value = false;
     } catch (e) {
-      print('Error removing book from favorites: $e');
+      print('Error removing from favorites: $e');
     }
   }
 
@@ -143,4 +140,42 @@ class BookDetailsController extends GetxController {
       addToFavorites();
     }
   }
+
+  Future<void> markBookAsRead() async {
+    try {
+      final userId = Get.find<AuthController>().user?.uid;
+      if (userId != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .collection('read_books')
+            .doc(bookId)
+            .set({
+          'name': book.value?.name,
+          'author': book.value?.author,
+          'cover_url': book.value?.coverUrl,
+          'read_at': Timestamp.now(),
+        });
+      }
+    } catch (e) {
+      print('Error marking book as read: $e');
+    }
+  }
+
+  Future<void> updateBookRating(double rating) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection(book.value!.isNormalBook ? 'normal_books' : 'premium_books')
+          .doc(bookId)
+          .update({'rating': rating});
+
+      // Update the local book rating
+      book.update((val) {
+        val?.rating = rating;
+      });
+    } catch (e) {
+      print('Error updating book rating: $e');
+    }
+  }
 }
+

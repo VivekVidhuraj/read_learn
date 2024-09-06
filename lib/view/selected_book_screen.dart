@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart'; // Import Razorpay
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:read/controller/book_detail_controller.dart';
 import 'package:read/view/pdfviewscreen.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart'; // Import RatingBar package
 
 class BookDetailsView extends StatelessWidget {
   final String bookId;
-  late Razorpay _razorpay; // Declare Razorpay instance
+  late Razorpay _razorpay;
 
   BookDetailsView({required this.bookId}) {
     _razorpay = Razorpay();
@@ -17,21 +18,17 @@ class BookDetailsView extends StatelessWidget {
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
     final controller = Get.find<BookDetailsController>();
-    controller.markBookAsPurchased(); // Mark the book as purchased
+    controller.markBookAsPurchased();
   }
 
-  void _handlePaymentError(PaymentFailureResponse response) {
-    // Handle payment error
-  }
+  void _handlePaymentError(PaymentFailureResponse response) {}
 
-  void _handleExternalWallet(ExternalWalletResponse response) {
-    // Handle external wallet
-  }
+  void _handleExternalWallet(ExternalWalletResponse response) {}
 
   void _initiatePayment(double amount) {
     var options = {
       'key': 'rzp_test_cDa0MyUrUlSnWd',
-      'amount': amount * 100, // Convert amount to paise
+      'amount': amount * 100,
       'name': 'Book Purchase',
       'description': 'Purchase of premium book',
       'prefill': {
@@ -103,11 +100,7 @@ class BookDetailsView extends StatelessWidget {
                       size: 30,
                     ),
                     onPressed: () {
-                      if (isFavorite) {
-                        controller.removeFromFavorites();
-                      } else {
-                        controller.addToFavorites();
-                      }
+                      controller.toggleFavorite();
                     },
                   ),
                 ],
@@ -154,6 +147,22 @@ class BookDetailsView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
+              RatingBar.builder(
+                initialRating: book.rating ?? 0, // Use a default rating if null
+                minRating: 1,
+                direction: Axis.horizontal,
+                allowHalfRating: true,
+                itemCount: 5,
+                itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                itemBuilder: (context, _) => Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                ),
+                onRatingUpdate: (rating) {
+                  controller.updateBookRating(rating);
+                },
+              ),
+              const SizedBox(height: 24),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFFA726),
@@ -166,9 +175,12 @@ class BookDetailsView extends StatelessWidget {
                 onPressed: () {
                   if (book.isNormalBook || isBookPurchased) {
                     if (book.pdfUrl.isNotEmpty) {
+                      // Navigate to the PDF viewer
                       Get.to(() => PdfViewerScreen(pdfUrl: book.pdfUrl));
-                    } else {
-                      // Handle case where PDF is not available
+
+                      // Mark the book as read
+                      final controller = Get.find<BookDetailsController>();
+                      controller.markBookAsRead();
                     }
                   } else {
                     _initiatePayment(book.price);
@@ -178,7 +190,8 @@ class BookDetailsView extends StatelessWidget {
                   isBookPurchased || book.isNormalBook ? 'Read Book' : 'Buy and Read',
                   style: const TextStyle(fontSize: 18),
                 ),
-              ),
+              )
+
             ],
           ),
         );

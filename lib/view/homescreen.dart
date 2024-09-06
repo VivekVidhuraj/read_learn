@@ -6,7 +6,8 @@ import 'package:read/controller/banner_image_controller.dart';
 import 'package:read/controller/auth_controller.dart';
 import 'package:read/view/selected_book_screen.dart';
 
-import '../controller/book_controller.dart'; // Import the new page
+import '../controller/book_controller.dart';
+import '../model/book_model.dart'; // Import the new page
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -140,17 +141,19 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 10),
             _buildRecentlyPublishedBooks(),
             const SizedBox(height: 20),
-            _buildSectionTitle('Selected Authors'),
+            _buildSectionTitle('All Bo'),
             const SizedBox(height: 10),
             _buildHorizontalScroll(
-              items: [
-                _buildAuthorItem('asset/images/img_1.png', 'Author 1'),
-                const SizedBox(width: 10),
-                _buildAuthorItem('asset/images/img_1.png', 'Author 2'),
-                const SizedBox(width: 10),
-                _buildAuthorItem('asset/images/img_1.png', 'Author 3'),
-              ],
+              items: _bookController.recentlyPublishedBooks.map((book) {
+                return Row(
+                  children: [
+                    _buildBookItem(book),  // Replace with the dynamic book item
+                    const SizedBox(width: 10), // Space between items
+                  ],
+                );
+              }).toList(),
             ),
+
             //const SizedBox(height: 20),
             // _buildSectionTitle('Categories'),
             //  const SizedBox(height: 10),
@@ -257,14 +260,14 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: const Icon(Icons.book),
         title: const Text('Purchased Books'),
         onTap: () {
-          Get.toNamed('/purchasedbook'); // Navigate to the new page
+          Get.toNamed('/purchasedbook'); // Navigate to the purchased book page
         },
       ),
       ListTile(
-        leading: const Icon(Icons.settings),
-        title: const Text('Settings'),
+        leading: const Icon(Icons.history),
+        title: const Text('History'),
         onTap: () {
-          // Navigate to Settings screen
+          Get.toNamed('/history');// Navigate to history screen
         },
       ),
       ListTile(
@@ -353,97 +356,140 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
   Widget _buildRecentlyPublishedBooks() {
+    // Add a ScrollController to track scrolling
+    final _scrollController = ScrollController();
+
+    // Add a listener to update the current page based on the scroll position
+    _scrollController.addListener(() {
+      double offset = _scrollController.offset;
+      double maxScrollExtent = _scrollController.position.maxScrollExtent;
+      // Update the progress based on the scroll position
+      _scrollProgress.value = offset / maxScrollExtent;
+    });
+
     return Obx(() {
       if (_bookController.recentlyPublishedBooks.isEmpty) {
         return const Center(child: CircularProgressIndicator());
       }
 
-      return SizedBox(
-        height: 150,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: _bookController.recentlyPublishedBooks.length,
-          itemBuilder: (context, index) {
-            final book = _bookController.recentlyPublishedBooks[index];
+      // Limit to the latest 5 books
+      final recentBooks = _bookController.recentlyPublishedBooks.take(5).toList();
 
-            return GestureDetector(
-              onTap: () {
-                // Pass the book ID or the book object to the BookDetailsView
-                Get.to(() => BookDetailsView(bookId: book.bookId)); // Adjust based on how you manage book IDs
-              },
-              child: Container(
-                margin: const EdgeInsets.only(right: 10),
-                width: 100,
-                decoration: BoxDecoration(
-                  color: _cardColor,
-                  borderRadius: BorderRadius.circular(10),
-                  // Removed the boxShadow property
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      height: 100, // Set a fixed height for the image container
-                      width: double.infinity, // Make the image container fill the available width
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage(book.coverUrl),
-                          fit: BoxFit.cover, // Ensure the image covers the entire container
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 150,
+            child: ListView.builder(
+              controller: _scrollController,
+              scrollDirection: Axis.horizontal,
+              itemCount: recentBooks.length,
+              itemBuilder: (context, index) {
+                final book = recentBooks[index];
+
+                return GestureDetector(
+                  onTap: () {
+                    Get.to(() => BookDetailsView(bookId: book.bookId));
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 10),
+                    width: 100,
+                    decoration: BoxDecoration(
+                      color: _cardColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          height: 100,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: NetworkImage(book.coverUrl),
+                              fit: BoxFit.cover,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                        const SizedBox(height: 5),
+                        Text(
+                          book.name,
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 5),
-                    Text(
-                      book.name,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 10),
+          // Horizontal progress indicator
+          Obx(() {
+            return LinearProgressIndicator(
+              value: _scrollProgress.value, // The scroll progress
+              minHeight: 3,
+              backgroundColor: Colors.grey.shade300,
+              valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
             );
-          },
-        ),
+          }),
+        ],
       );
     });
   }
 
-  Widget _buildAuthorItem(String imagePath, String name) {
-    return Container(
-      width: 100,
-      decoration: BoxDecoration(
-        color: _cardColor,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            spreadRadius: 2,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(imagePath),
-                  fit: BoxFit.cover,
+  final _scrollProgress = Rx<double>(0.0); // Add this at the top of your state class
+
+
+
+
+
+  Widget _buildBookItem(Book book) {
+    return GestureDetector(
+      onTap: () {
+        // Navigate to the book details page when tapped
+        Get.to(() => BookDetailsView(bookId: book.bookId));
+      },
+      child: Container(
+        width: 100,
+        decoration: BoxDecoration(
+          color: _cardColor,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: 2,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Display book cover image
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(book.coverUrl), // Book cover from Firestore
+                    fit: BoxFit.cover,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                borderRadius: BorderRadius.circular(10),
               ),
             ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            name,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-        ],
+            const SizedBox(height: 5),
+            // Display book name
+            Text(
+              book.name,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

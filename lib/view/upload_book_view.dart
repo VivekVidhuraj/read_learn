@@ -54,9 +54,13 @@ class UploadBookView extends StatelessWidget {
                           filled: true,
                           fillColor: Colors.grey[200],
                         ),
+                        keyboardType: TextInputType.text,
                         validator: (value) {
+                          final regex = RegExp(r'^[a-zA-Z0-9\s]+$');
                           if (value == null || value.isEmpty) {
                             return 'Please enter book name';
+                          } else if (!regex.hasMatch(value)) {
+                            return 'Invalid book name';
                           }
                           return null;
                         },
@@ -72,9 +76,13 @@ class UploadBookView extends StatelessWidget {
                           filled: true,
                           fillColor: Colors.grey[200],
                         ),
+                        keyboardType: TextInputType.text,
                         validator: (value) {
+                          final regex = RegExp(r'^[a-zA-Z\s\.]+$');
                           if (value == null || value.isEmpty) {
                             return 'Please enter author name';
+                          } else if (!regex.hasMatch(value)) {
+                            return 'Invalid author name';
                           }
                           return null;
                         },
@@ -90,9 +98,13 @@ class UploadBookView extends StatelessWidget {
                           filled: true,
                           fillColor: Colors.grey[200],
                         ),
+                        keyboardType: TextInputType.numberWithOptions(decimal: true),
                         validator: (value) {
+                          final regex = RegExp(r'^\d+(\.\d{1,2})?$');
                           if (value == null || value.isEmpty) {
                             return 'Please enter price';
+                          } else if (!regex.hasMatch(value)) {
+                            return 'Invalid price format';
                           }
                           return null;
                         },
@@ -108,9 +120,14 @@ class UploadBookView extends StatelessWidget {
                           filled: true,
                           fillColor: Colors.grey[200],
                         ),
+                        keyboardType: TextInputType.multiline,
+                        maxLines: null, // Allows multiple lines
                         validator: (value) {
+                          final regex = RegExp(r'.{10,}'); // Minimum 10 characters
                           if (value == null || value.isEmpty) {
                             return 'Please enter a description';
+                          } else if (!regex.hasMatch(value)) {
+                            return 'Description must be at least 10 characters';
                           }
                           return null;
                         },
