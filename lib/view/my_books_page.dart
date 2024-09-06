@@ -210,8 +210,8 @@ class MyBooksPage extends StatelessWidget {
             label: 'My Books',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark),
-            label: 'Bookmarks',
+            icon: Icon(Icons.favorite),
+            label: 'Favorite',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -231,7 +231,7 @@ class MyBooksPage extends StatelessWidget {
             // Already on MyBooksPage
               break;
             case 2:
-              Get.toNamed('/bookmarks'); // Navigate to Bookmarks
+              Get.toNamed('/favorite'); // Navigate to Bookmarks
               break;
             case 3:
               Get.toNamed('/profile'); // Navigate to Profile

@@ -18,15 +18,14 @@ class BookDetailsView extends StatelessWidget {
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
     final controller = Get.find<BookDetailsController>();
     controller.markBookAsPurchased(); // Mark the book as purchased
-    Get.snackbar('Payment Success', 'Payment was successful');
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
-    Get.snackbar('Payment Error', 'Payment failed: ${response.message}');
+    // Handle payment error
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
-    Get.snackbar('External Wallet', 'External Wallet used: ${response.walletName}');
+    // Handle external wallet
   }
 
   void _initiatePayment(double amount) {
@@ -65,6 +64,7 @@ class BookDetailsView extends StatelessWidget {
       body: Obx(() {
         final book = controller.book.value;
         final isBookPurchased = controller.isBookPurchased.value;
+        final isFavorite = controller.isFavorite.value;
 
         if (book == null) {
           return const Center(child: CircularProgressIndicator());
@@ -85,13 +85,32 @@ class BookDetailsView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Text(
-                book.name,
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF0A0E21),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    book.name,
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0A0E21),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: isFavorite ? Colors.red : Colors.grey,
+                      size: 30,
+                    ),
+                    onPressed: () {
+                      if (isFavorite) {
+                        controller.removeFromFavorites();
+                      } else {
+                        controller.addToFavorites();
+                      }
+                    },
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               Text(
@@ -149,7 +168,7 @@ class BookDetailsView extends StatelessWidget {
                     if (book.pdfUrl.isNotEmpty) {
                       Get.to(() => PdfViewerScreen(pdfUrl: book.pdfUrl));
                     } else {
-                      Get.snackbar('Error', 'PDF not available for this book.');
+                      // Handle case where PDF is not available
                     }
                   } else {
                     _initiatePayment(book.price);

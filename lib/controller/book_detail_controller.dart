@@ -7,6 +7,7 @@ class BookDetailsController extends GetxController {
   final String bookId;
   var book = Rxn<Book>();
   var isBookPurchased = false.obs; // Track if the book is purchased
+  var isFavorite = false.obs; // Track if the book is a favorite
 
   BookDetailsController({required this.bookId});
 
@@ -15,6 +16,7 @@ class BookDetailsController extends GetxController {
     super.onInit();
     fetchBookDetails();
     checkIfBookPurchased(); // Check if the book has been purchased
+    checkIfBookFavorite(); // Check if the book is marked as favorite
   }
 
   Future<void> fetchBookDetails() async {
@@ -49,7 +51,7 @@ class BookDetailsController extends GetxController {
 
   Future<void> checkIfBookPurchased() async {
     try {
-      final userId = Get.find<AuthController>().user?.uid; // Assuming you have an AuthController to get the current user
+      final userId = Get.find<AuthController>().user?.uid;
       if (userId != null) {
         final purchaseSnapshot = await FirebaseFirestore.instance
             .collection('users')
@@ -79,6 +81,66 @@ class BookDetailsController extends GetxController {
       }
     } catch (e) {
       print('Error marking book as purchased: $e');
+    }
+  }
+
+  Future<void> checkIfBookFavorite() async {
+    try {
+      final userId = Get.find<AuthController>().user?.uid;
+      if (userId == null) return;
+
+      final favoriteSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('favorites')
+          .doc(bookId)
+          .get();
+
+      isFavorite.value = favoriteSnapshot.exists;
+    } catch (e) {
+      print('Error checking favorite status: $e');
+    }
+  }
+
+  Future<void> addToFavorites() async {
+    try {
+      final userId = Get.find<AuthController>().user?.uid;
+      if (userId == null) return;
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('favorites')
+          .doc(bookId)
+          .set({'added_at': Timestamp.now()});
+      isFavorite.value = true;
+    } catch (e) {
+      print('Error adding book to favorites: $e');
+    }
+  }
+
+  Future<void> removeFromFavorites() async {
+    try {
+      final userId = Get.find<AuthController>().user?.uid;
+      if (userId == null) return;
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('favorites')
+          .doc(bookId)
+          .delete();
+      isFavorite.value = false;
+    } catch (e) {
+      print('Error removing book from favorites: $e');
+    }
+  }
+
+  void toggleFavorite() {
+    if (isFavorite.value) {
+      removeFromFavorites();
+    } else {
+      addToFavorites();
     }
   }
 }

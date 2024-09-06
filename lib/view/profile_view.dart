@@ -161,8 +161,8 @@ class _ProfileManagementPageState extends State<ProfileManagementPage> {
             label: 'My Books',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark),
-            label: 'Bookmarks',
+            icon: Icon(Icons.favorite),
+            label: 'Favorite',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -173,9 +173,20 @@ class _ProfileManagementPageState extends State<ProfileManagementPage> {
         selectedItemColor: _primaryColor,
         unselectedItemColor: Colors.grey,
         onTap: (index) {
-          // Handle bottom navigation bar taps
-          if (index != 3) {
-            Get.toNamed('/home'); // Adjust this as needed
+          switch (index) {
+            case 0:
+              Get.toNamed('/home'); // Navigate to Home
+              break;
+            case 1:
+              Get.toNamed('/mybooks'); // Navigate to My Books
+              break;
+            case 2:
+              Get.toNamed('/favorite');
+            // Already on FavoritesPage
+              break;
+            case 3:
+              // Already on FavoritesPage
+              break;
           }
         },
       ),

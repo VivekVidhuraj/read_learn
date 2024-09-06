@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -36,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Get.toNamed('/mybooks'); // Navigate to the new page
           break;
         case 2:
-        // Handle Bookmarks navigation
+          Get.toNamed('/favorite');
           break;
         case 3:
           Get.toNamed('/profile');
@@ -132,16 +133,12 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildBannerCarousel(),
             const SizedBox(height: 20),
             //_buildSectionTitle('Featured Books'),
-           // const SizedBox(height: 10),
+            // const SizedBox(height: 10),
             //_buildFeaturedBooks(),
-         //   const SizedBox(height: 20),
+            //   const SizedBox(height: 20),
             _buildSectionTitle('Recently Published'),
             const SizedBox(height: 10),
             _buildRecentlyPublishedBooks(),
-            const SizedBox(height: 20),
-            _buildSectionTitle('Bookmarks'),
-            const SizedBox(height: 10),
-            _buildBookmarks(),
             const SizedBox(height: 20),
             _buildSectionTitle('Selected Authors'),
             const SizedBox(height: 10),
@@ -155,9 +152,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             //const SizedBox(height: 20),
-           // _buildSectionTitle('Categories'),
-          //  const SizedBox(height: 10),
-          //  _buildCategories(),
+            // _buildSectionTitle('Categories'),
+            //  const SizedBox(height: 10),
+            //  _buildCategories(),
           ],
         ),
       ),
@@ -172,8 +169,8 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'My Books',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark),
-            label: 'Bookmarks',
+            icon: Icon(Icons.favorite),
+            label: 'Favorite',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -258,16 +255,9 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       ListTile(
         leading: const Icon(Icons.book),
-        title: const Text('My Books'),
+        title: const Text('Purchased Books'),
         onTap: () {
-          Get.toNamed('/mybooks'); // Navigate to the new page
-        },
-      ),
-      ListTile(
-        leading: const Icon(Icons.bookmark),
-        title: const Text('Bookmarks'),
-        onTap: () {
-          // Navigate to Bookmarks screen
+          Get.toNamed('/purchasedbook'); // Navigate to the new page
         },
       ),
       ListTile(
@@ -361,61 +351,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Widget _buildFeaturedBooks() {
-  //   return SizedBox(
-  //     height: 150,
-  //     child: ListView.builder(
-  //       scrollDirection: Axis.horizontal,
-  //       itemCount: 10, // Number of featured books
-  //       itemBuilder: (context, index) {
-  //         return GestureDetector(
-  //           onTap: () {
-  //             // Pass the book ID or the book object to the BookDetailsView
-  //             Get.to(() => BookDetailsView(bookId: 'featured_book_id_$index')); // Adjust based on how you manage book IDs
-  //           },
-  //           child: Container(
-  //             margin: const EdgeInsets.only(right: 10),
-  //             width: 100,
-  //             decoration: BoxDecoration(
-  //               color: _cardColor,
-  //               borderRadius: BorderRadius.circular(10),
-  //               boxShadow: [
-  //                 BoxShadow(
-  //                   color: Colors.grey.withOpacity(0.3),
-  //                   spreadRadius: 2,
-  //                   blurRadius: 4,
-  //                   offset: const Offset(0, 2),
-  //                 ),
-  //               ],
-  //             ),
-  //             child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.center,
-  //               children: [
-  //                 Expanded(
-  //                   child: Container(
-  //                     decoration: BoxDecoration(
-  //                       // image: const DecorationImage(
-  //                       //   image: AssetImage('asset/images/sample_book_cover.png'),
-  //                       //   fit: BoxFit.cover,
-  //                       // ),
-  //                       borderRadius: BorderRadius.circular(10),
-  //                     ),
-  //                   ),
-  //                 ),
-  //                 const SizedBox(height: 5),
-  //                 const Text(
-  //                   'Book Title',
-  //                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-  //                   textAlign: TextAlign.center,
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         );
-  //       },
-  //     ),
-  //   );
-  // }
 
   Widget _buildRecentlyPublishedBooks() {
     return Obx(() {
@@ -474,59 +409,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-
-
-
-  Widget _buildBookmarks() {
-    return SizedBox(
-      height: 150,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: 10, // Number of bookmarks
-        itemBuilder: (context, index) {
-          return Container(
-            margin: const EdgeInsets.only(right: 10),
-            width: 100,
-            decoration: BoxDecoration(
-              color: _cardColor,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 2,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      //image: const DecorationImage(
-                      //image: AssetImage('asset/images/sample_book_cover.png'),
-                      // fit: BoxFit.cover,
-                      //),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                const Text(
-                  'Book Title',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   Widget _buildAuthorItem(String imagePath, String name) {
     return Container(
       width: 100,
@@ -576,53 +458,5 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Widget _buildCategories() {
-  //   return SizedBox(
-  //     height: 100,
-  //     child: ListView.builder(
-  //       scrollDirection: Axis.horizontal,
-  //       itemCount: 10, // Number of categories
-  //       itemBuilder: (context, index) {
-  //         return Container(
-  //           margin: const EdgeInsets.only(right: 10),
-  //           width: 80,
-  //           decoration: BoxDecoration(
-  //             color: _cardColor,
-  //             borderRadius: BorderRadius.circular(10),
-  //             boxShadow: [
-  //               BoxShadow(
-  //                 color: Colors.grey.withOpacity(0.3),
-  //                 spreadRadius: 2,
-  //                 blurRadius: 4,
-  //                 offset: const Offset(0, 2),
-  //               ),
-  //             ],
-  //           ),
-  //           child: Column(
-  //             mainAxisAlignment: MainAxisAlignment.center,
-  //             children: [
-  //               Expanded(
-  //                 child: Container(
-  //                   decoration: BoxDecoration(
-  //                     image: const DecorationImage(
-  //                       image: AssetImage('asset/images/sample_category_image.png'),
-  //                       fit: BoxFit.cover,
-  //                     ),
-  //                     borderRadius: BorderRadius.circular(10),
-  //                   ),
-  //                 ),
-  //               ),
-  //               const SizedBox(height: 5),
-  //               const Text(
-  //                 'Category Name',
-  //                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-  //                 textAlign: TextAlign.center,
-  //               ),
-  //             ],
-  //           ),
-  //         );
-  //       },
-  //     ),
-  //   );
-  // }
+
 }
