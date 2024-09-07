@@ -7,6 +7,7 @@ import 'package:read/controller/auth_controller.dart';
 import 'package:read/view/selected_book_screen.dart';
 
 import '../controller/book_controller.dart';
+import '../controller/subscription_controller.dart';
 import '../model/book_model.dart'; // Import the new page
 
 class HomeScreen extends StatefulWidget {
@@ -22,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   final AuthController _authController = Get.find<AuthController>();
   final BannerImageController _bannerImageController = Get.put(BannerImageController());
+
 
   final Color _primaryColor = const Color(0xFF0A0E21);
   final Color _secondaryColor = const Color(0xFFFFA726);
@@ -40,18 +42,46 @@ class _HomeScreenState extends State<HomeScreen> {
         case 2:
           Get.toNamed('/favorite');
           break;
-        case 3:
-          Get.toNamed('/profile');
-          break;
+
       }
     });
   }
+
+  void _showPrivacyPolicyDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Privacy Policy'),
+          content: const SingleChildScrollView(
+            child: Text(
+                'This is the privacy policy of Read, an online library app. We do not collect, store, or process any personal data beyond what is required to operate the app.'
+                    '\n\nSubscription Plan: We offer a subscription plan for Rs 899 per month, providing full access to all premium books. However, downloads of premium books are not allowed. Non-premium members must purchase each premium book individually if they wish to read it. All users, both premium and non-premium, have access to our normal books.'
+                    '\n\nPermissions: Users can upload and change their profile photos within the app.'
+                    '\n\nData Sharing: No personal data is collected, so no data is shared with third parties.'
+                    '\n\nSecurity: We are committed to maintaining the security of your data. All information is secured, and no unauthorized access is allowed.'
+                    '\n\nFor more details, please contact us at vivekvraj2001@gmail.com.' // Add the full privacy policy content here.
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('eLibrary', style: TextStyle(color: Colors.white)),
+        title: const Text('Read', style: TextStyle(color: Colors.white)),
         backgroundColor: _primaryColor,
         elevation: 0,
         leading: Builder(
@@ -129,8 +159,8 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            _buildSearchBar(),
-            const SizedBox(height: 16),
+            // _buildSearchBar(),
+            // const SizedBox(height: 16),
             _buildBannerCarousel(),
             const SizedBox(height: 20),
             //_buildSectionTitle('Featured Books'),
@@ -141,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 10),
             _buildRecentlyPublishedBooks(),
             const SizedBox(height: 20),
-            _buildSectionTitle('All Bo'),
+            _buildSectionTitle('All Books'),
             const SizedBox(height: 10),
             _buildHorizontalScroll(
               items: _bookController.recentlyPublishedBooks.map((book) {
@@ -174,10 +204,6 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
             label: 'Favorite',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
           ),
         ],
         currentIndex: _selectedIndex,
@@ -221,34 +247,42 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     });
   }
-
-  Widget _buildSearchBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15.0),
-      decoration: BoxDecoration(
-        color: _cardColor,
-        borderRadius: BorderRadius.circular(20.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: const TextField(
-        decoration: InputDecoration(
-          hintText: 'Search for books...',
-          border: InputBorder.none,
-          prefixIcon: Icon(Icons.search),
-        ),
-      ),
-    );
-  }
+  //
+  // Widget _buildSearchBar() {
+  //   return Container(
+  //     padding: const EdgeInsets.symmetric(horizontal: 15.0),
+  //     decoration: BoxDecoration(
+  //       color: _cardColor,
+  //       borderRadius: BorderRadius.circular(20.0),
+  //       boxShadow: [
+  //         BoxShadow(
+  //           color: Colors.grey.withOpacity(0.5),
+  //           spreadRadius: 2,
+  //           blurRadius: 5,
+  //           offset: const Offset(0, 3),
+  //         ),
+  //       ],
+  //     ),
+  //     child: const TextField(
+  //       decoration: InputDecoration(
+  //         hintText: 'Search for books...',
+  //         border: InputBorder.none,
+  //         prefixIcon: Icon(Icons.search),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   List<Widget> _buildDrawerItems() {
     return [
+
+      ListTile(
+        leading: const Icon(Icons.person),
+        title: const Text('My Profile'),
+        onTap: () {
+          Get.toNamed('/profile');
+        },
+      ),
       ListTile(
         leading: const Icon(Icons.notifications),
         title: const Text('Notification'),
@@ -271,6 +305,14 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
       ListTile(
+        leading: const Icon(Icons.privacy_tip),
+        title: const Text('Privacy Policy'),
+        onTap: () {
+          _showPrivacyPolicyDialog(); // Call the dialog function instead of navigating
+        },
+      ),
+
+      ListTile(
         leading: const Icon(Icons.logout),
         title: const Text('Logout'),
         onTap: () {
@@ -280,68 +322,90 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
   }
 
+  // Widget that builds the subscription item
   Widget _buildPremiumSubscriptionItem() {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [_primaryColor, _secondaryColor],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return Obx(() {
+      final isPremium = Get.find<SubscriptionController>().isPremiumSubscriber.value;
+      final expiryDate = Get.find<SubscriptionController>().subscriptionExpiryDate.value;
+
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [_primaryColor, _secondaryColor],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          const Icon(
-            Icons.star,
-            color: Colors.white,
-            size: 40,
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            'Premium Subscription',
-            style: TextStyle(
+        child: Column(
+          children: [
+            const Icon(
+              Icons.star,
               color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+              size: 32,
             ),
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            'Get unlimited access to premium content and features.',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: _primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+            const SizedBox(height: 8),
+            Text(
+              isPremium ? 'Premium Active' : 'Premium Subscription',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            onPressed: () {
-              // Handle subscription action
-            },
-            child: const Text('Subscribe Now'),
-          ),
-        ],
-      ),
-    );
+            const SizedBox(height: 6),
+            Text(
+              isPremium
+                  ? 'Active until ${expiryDate.toLocal().toString().split(' ')[0]}.'
+                  : 'Unlock premium content and features.',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            if (!isPremium)
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: _primaryColor,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                ),
+                onPressed: () {
+                  Get.find<SubscriptionController>().initiateSubscriptionPayment();
+                },
+                child: const Text(
+                  'Subscribe Now',
+                  style: TextStyle(fontSize: 14),
+                ),
+              ),
+          ],
+        ),
+      );
+    });
   }
+
+
+
+  void _initiateSubscriptionPayment() {
+    // Implement the subscription payment initiation logic here
+    // For example, navigating to a payment page or processing payment
+    Get.toNamed('/subscription'); // Replace with your subscription page
+  }
+
 
   Widget _buildSectionTitle(String title) {
     return Text(

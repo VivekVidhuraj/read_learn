@@ -191,45 +191,9 @@ class _ProfileManagementPageState extends State<ProfileManagementPage> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'My Books',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favorite',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: 3,
-        selectedItemColor: _primaryColor,
-        unselectedItemColor: Colors.grey,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              Get.toNamed('/home');
-              break;
-            case 1:
-              Get.toNamed('/mybooks');
-              break;
-            case 2:
-              Get.toNamed('/favorite');
-              break;
-            case 3:
-              break;
-          }
-        },
-      ),
-    );
+
+      );
+
   }
 
   Future<void> _showFullSizeImage() {

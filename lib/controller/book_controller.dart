@@ -7,6 +7,7 @@ import '../controller/auth_controller.dart';
 class BookController extends GetxController {
   var recentlyPublishedBooks = <Book>[].obs; // List of books excluding current user's
   var notificationCount = 0.obs; // Notification count for the user
+  var searchResults = <Book>[].obs; // Observable list to hold search results
   final AuthController _authController = Get.find<AuthController>(); // Access AuthController
 
   @override
@@ -49,12 +50,11 @@ class BookController extends GetxController {
           .map((doc) => Book.fromDocument(doc, isNormalBook: false))
           .toList();
 
-      // Combine both lists into one and optionally sort by upload time, etc.
+      // Combine both lists into one
       final allBooks = [...normalBooks, ...premiumBooks];
 
       // Update the observable list with the combined results
       recentlyPublishedBooks.value = allBooks;
-
     } catch (e) {
       print('Error fetching recently published books: $e');
     }
@@ -77,6 +77,45 @@ class BookController extends GetxController {
       }
     } catch (e) {
       print('Error fetching notification count: $e');
+    }
+  }
+
+  // Method to fetch books by search query (name or author)
+  Future<void> searchBooks(String query) async {
+    try {
+      final currentUserId = _authController.user?.uid;
+
+      // Query normal books by name or author
+      final normalBooksQuery = FirebaseFirestore.instance
+          .collection('normal_books')
+          .where('name', isGreaterThanOrEqualTo: query)
+          .where('name', isLessThanOrEqualTo: query + '\uf8ff')
+          .limit(10)
+          .get();
+
+      // Query premium books similarly
+      final premiumBooksQuery = FirebaseFirestore.instance
+          .collection('premium_books')
+          .where('name', isGreaterThanOrEqualTo: query)
+          .where('name', isLessThanOrEqualTo: query + '\uf8ff')
+          .limit(10)
+          .get();
+
+      // Wait for both queries to complete
+      final normalBooksSnapshot = await normalBooksQuery;
+      final premiumBooksSnapshot = await premiumBooksQuery;
+
+      final normalBooks = normalBooksSnapshot.docs
+          .map((doc) => Book.fromDocument(doc, isNormalBook: true))
+          .toList();
+      final premiumBooks = premiumBooksSnapshot.docs
+          .map((doc) => Book.fromDocument(doc, isNormalBook: false))
+          .toList();
+
+      // Combine both lists and update searchResults
+      searchResults.value = [...normalBooks, ...premiumBooks];
+    } catch (e) {
+      print('Error searching for books: $e');
     }
   }
 }

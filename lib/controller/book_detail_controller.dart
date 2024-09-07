@@ -8,6 +8,7 @@ class BookDetailsController extends GetxController {
   var book = Rxn<Book>();
   var isBookPurchased = false.obs;
   var isFavorite = false.obs;
+  var isPremiumSubscriber = false.obs;
 
   BookDetailsController({required this.bookId});
 
@@ -17,6 +18,7 @@ class BookDetailsController extends GetxController {
     fetchBookDetails();
     checkIfBookPurchased();
     checkIfBookFavorite();
+    checkIfUserIsPremiumSubscriber(); // Check subscription status
   }
 
   Future<void> fetchBookDetails() async {
@@ -61,6 +63,22 @@ class BookDetailsController extends GetxController {
       }
     } catch (e) {
       print('Error checking book purchase status: $e');
+    }
+  }
+
+  Future<void> checkIfUserIsPremiumSubscriber() async {
+    try {
+      final userId = Get.find<AuthController>().user?.uid;
+      if (userId != null) {
+        final userSnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .get();
+
+        isPremiumSubscriber.value = userSnapshot.data()?['is_premium_subscriber'] ?? false;
+      }
+    } catch (e) {
+      print('Error checking user subscription status: $e');
     }
   }
 
@@ -177,5 +195,19 @@ class BookDetailsController extends GetxController {
       print('Error updating book rating: $e');
     }
   }
-}
 
+  Future<void> subscribeToPremium() async {
+    try {
+      final userId = Get.find<AuthController>().user?.uid;
+      if (userId != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .update({'is_premium_subscriber': true});
+        isPremiumSubscriber.value = true;
+      }
+    } catch (e) {
+      print('Error subscribing to premium: $e');
+    }
+  }
+}

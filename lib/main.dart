@@ -17,6 +17,8 @@ import 'package:read/view/splashscreen.dart';
 import 'package:read/view/upload_book_view.dart';
 import 'package:read/view/my_books_page.dart';
 
+import 'controller/subscription_controller.dart';
+
 
 // Import the new VerifyEmailScreen
 
@@ -26,7 +28,8 @@ void main() async {
 
   // Register controllers
   Get.put(AuthController());  // Initialize the AuthController
-  Get.put(BannerImageController()); // Initialize the BannerImageController
+  Get.put(BannerImageController());
+  Get.put(SubscriptionController()); // Initialize the BannerImageController
 
   runApp(MyApp());
 }

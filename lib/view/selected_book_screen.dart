@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:read/controller/book_detail_controller.dart';
 import 'package:read/view/pdfviewscreen.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart'; // Import RatingBar package
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class BookDetailsView extends StatelessWidget {
   final String bookId;
@@ -62,6 +62,7 @@ class BookDetailsView extends StatelessWidget {
         final book = controller.book.value;
         final isBookPurchased = controller.isBookPurchased.value;
         final isFavorite = controller.isFavorite.value;
+        final isPremiumSubscriber = controller.isPremiumSubscriber.value;
 
         if (book == null) {
           return const Center(child: CircularProgressIndicator());
@@ -148,7 +149,7 @@ class BookDetailsView extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               RatingBar.builder(
-                initialRating: book.rating ?? 0, // Use a default rating if null
+                initialRating: book.rating ?? 0,
                 minRating: 1,
                 direction: Axis.horizontal,
                 allowHalfRating: true,
@@ -173,13 +174,12 @@ class BookDetailsView extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 onPressed: () {
-                  if (book.isNormalBook || isBookPurchased) {
+                  if (book.isNormalBook || isBookPurchased || isPremiumSubscriber) {
                     if (book.pdfUrl.isNotEmpty) {
                       // Navigate to the PDF viewer
                       Get.to(() => PdfViewerScreen(pdfUrl: book.pdfUrl));
 
                       // Mark the book as read
-                      final controller = Get.find<BookDetailsController>();
                       controller.markBookAsRead();
                     }
                   } else {
@@ -187,11 +187,10 @@ class BookDetailsView extends StatelessWidget {
                   }
                 },
                 child: Text(
-                  isBookPurchased || book.isNormalBook ? 'Read Book' : 'Buy and Read',
+                  isBookPurchased || book.isNormalBook || isPremiumSubscriber ? 'Read Book' : 'Buy and Read',
                   style: const TextStyle(fontSize: 18),
                 ),
               )
-
             ],
           ),
         );

@@ -46,7 +46,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             SizedBox(height: 20),
             Text(
-              'Welcome to eLibrary', // Replace with your app's tagline
+              'Welcome to Read', // Replace with your app's tagline
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

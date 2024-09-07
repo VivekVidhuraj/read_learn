@@ -90,8 +90,15 @@ class MyBooksPage extends StatelessWidget {
         ),
         backgroundColor: _primaryColor,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white), // Back arrow icon with white color
+          onPressed: () {
+            Get.offNamed('/home'); // Navigate back to Home page
+          },
+        ),
         iconTheme: IconThemeData(color: Colors.white), // Set icon color to white
       ),
+
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -213,10 +220,7 @@ class MyBooksPage extends StatelessWidget {
             icon: Icon(Icons.favorite),
             label: 'Favorite',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+
         ],
         currentIndex: 1,
         selectedItemColor: _primaryColor,
@@ -233,9 +237,7 @@ class MyBooksPage extends StatelessWidget {
             case 2:
               Get.toNamed('/favorite'); // Navigate to Bookmarks
               break;
-            case 3:
-              Get.toNamed('/profile'); // Navigate to Profile
-              break;
+
           }
         },
       ),

@@ -1,8 +1,8 @@
 <!-- AndroidManifest.xml -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="read"
-        android:name="${applicationName}"
+        android:label="Read"
+        android:name="Read"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true"> <!-- Added attribute here -->
 

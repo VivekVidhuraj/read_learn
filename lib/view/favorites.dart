@@ -63,8 +63,16 @@ class _FavoritesPageState extends State<FavoritesPage> {
         ),
         backgroundColor: _primaryColor,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white), // Back arrow icon with white color
+          onPressed: () {
+            // Set the bottom navigation bar index to 0 (Home) and navigate to the home page
+            Get.offNamed('/home'); // Navigate to Home page
+          },
+        ),
         iconTheme: IconThemeData(color: Colors.white), // Set icon color to white
       ),
+
       body: SafeArea(
         child: Obx(() {
           final favoriteBooks = controller.favoriteBooks;
@@ -141,10 +149,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
             icon: Icon(Icons.favorite),
             label: 'Favorite',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+
         ],
         currentIndex: 2, // Set current index to Favorites
         selectedItemColor: _primaryColor,
@@ -160,9 +165,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
               break;
             case 2:
             // Already on FavoritesPage
-              break;
-            case 3:
-              Get.toNamed('/profile'); // Navigate to Profile
               break;
           }
         },
