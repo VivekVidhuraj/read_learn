@@ -1,9 +1,8 @@
-import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:read/model/fetch_user_book_model.dart'; // Ensure your model imports are correct
 
 class MyBooksController extends GetxController {
@@ -19,17 +18,9 @@ class MyBooksController extends GetxController {
     fetchCategories();
   }
 
-  Future<String> _uploadFile(File file, String folder) async {
-    final fileName = file.uri.pathSegments.last;
-    final ref = FirebaseStorage.instance.ref().child('$folder/$fileName');
-    final uploadTask = ref.putFile(file);
-    final snapshot = await uploadTask.whenComplete(() {});
-    final downloadUrl = await snapshot.ref.getDownloadURL();
-    return downloadUrl;
-  }
-
   void fetchUserBooks() async {
     try {
+      // Get current user ID
       final userId = FirebaseAuth.instance.currentUser?.uid;
       if (userId != null) {
         final premiumBooksQuery = FirebaseFirestore.instance
@@ -89,40 +80,17 @@ class MyBooksController extends GetxController {
     }
   }
 
-  void updateBookDetails(
-      String bookId,
-      String name,
-      String author,
-      String description,
-      int pageCount,
-      String categoryId,
-      String subcategoryName, {
-        File? coverImage,
-        File? pdfFile,
-      }) async {
+  void updateBookDetails(String bookId, String name, String author, String description, int pageCount, String categoryId, String subcategoryName) async {
     try {
-      final updates = {
+      final bookRef = FirebaseFirestore.instance.collection('books').doc(bookId);
+      await bookRef.update({
         'name': name,
         'author': author,
         'description': description,
         'page_count': pageCount,
         'category_id': categoryId,
-        'subcategory_name': subcategoryName,
-      };
-
-      if (coverImage != null) {
-        final coverUrl = await _uploadFile(coverImage, 'covers');
-        updates['cover_url'] = coverUrl;
-      }
-
-      if (pdfFile != null) {
-        final pdfUrl = await _uploadFile(pdfFile, 'pdfs');
-        updates['pdf_url'] = pdfUrl;
-      }
-
-      final bookRef = FirebaseFirestore.instance.collection('books').doc(bookId);
-      await bookRef.update(updates);
-
+        'subcategory_name': subcategoryName, // Handle this field as necessary
+      });
       // Refresh the list after update
       fetchUserBooks();
       Get.snackbar('Success', 'Book details updated successfully',
