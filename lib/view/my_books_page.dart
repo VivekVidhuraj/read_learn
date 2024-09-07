@@ -1,5 +1,8 @@
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:read/controller/my_books_controller.dart';
 import 'package:read/model/fetch_user_book_model.dart'; // Adjust the path if necessary
 
@@ -15,6 +18,24 @@ class MyBooksPage extends StatelessWidget {
     final _pageCountController = TextEditingController(text: book.pageCount.toString());
     final _categoryController = TextEditingController(text: book.categoryId);
     final _subCategoryController = TextEditingController(text: book.subcategoryName);
+
+    File? coverImage;
+    File? pdfFile;
+
+    Future<void> _pickCoverImage() async {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        coverImage = File(pickedFile.path);
+      }
+    }
+
+    Future<void> _pickPdf() async {
+      final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
+      if (result != null) {
+        pdfFile = File(result.files.single.path!);
+      }
+    }
 
     showDialog(
       context: context,
@@ -51,6 +72,18 @@ class MyBooksPage extends StatelessWidget {
                   controller: _subCategoryController,
                   decoration: InputDecoration(labelText: 'Subcategory'),
                 ),
+                SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: _pickCoverImage,
+                  child: Text('Select Cover Image'),
+                ),
+                if (coverImage != null) Text('Cover Image Selected'),
+                SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: _pickPdf,
+                  child: Text('Select PDF'),
+                ),
+                if (pdfFile != null) Text('PDF Selected'),
               ],
             ),
           ),
@@ -65,6 +98,8 @@ class MyBooksPage extends StatelessWidget {
                   int.tryParse(_pageCountController.text) ?? 0,
                   _categoryController.text,
                   _subCategoryController.text,
+                  coverImage: coverImage,
+                  pdfFile: pdfFile,
                 );
                 Get.back();
               },
@@ -98,7 +133,6 @@ class MyBooksPage extends StatelessWidget {
         ),
         iconTheme: IconThemeData(color: Colors.white), // Set icon color to white
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -106,7 +140,6 @@ class MyBooksPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Premium Books Section
                 Text(
                   'Premium Books',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: _primaryColor),
@@ -114,39 +147,19 @@ class MyBooksPage extends StatelessWidget {
                 SizedBox(height: 10),
                 Obx(() {
                   if (controller.premiumBooks.isEmpty) {
-                    return Center(
-                      child: Text('No Premium Books found.', style: TextStyle(fontSize: 16)),
-                    );
+                    return Center(child: Text('No premium books found'));
                   }
                   return ListView.builder(
                     shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
                     itemCount: controller.premiumBooks.length,
                     itemBuilder: (context, index) {
                       final book = controller.premiumBooks[index];
-                      return Card(
-                        margin: EdgeInsets.symmetric(vertical: 8.0),
-                        elevation: 4,
-                        child: ListTile(
-                          contentPadding: EdgeInsets.all(16.0),
-                          leading: book.coverUrl.isNotEmpty
-                              ? Image.network(book.coverUrl, width: 50, height: 75, fit: BoxFit.cover)
-                              : Icon(Icons.book, size: 50, color: _primaryColor),
-                          title: Text(book.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(book.author, style: TextStyle(fontSize: 16)),
-                              Text('Page Count: ${book.pageCount}', style: TextStyle(fontSize: 14, color: Colors.grey)),
-                              Text('Category: ${book.categoryId}', style: TextStyle(fontSize: 14, color: Colors.grey)),
-                              Text('Subcategory: ${book.subcategoryName}', style: TextStyle(fontSize: 14, color: Colors.grey)),
-                              Text('Description: ${book.description}', style: TextStyle(fontSize: 14, color: Colors.grey)),
-                            ],
-                          ),
-                          trailing: IconButton(
-                            icon: Icon(Icons.edit),
-                            onPressed: () => _showEditDialog(context, book),
-                          ),
+                      return ListTile(
+                        title: Text(book.name),
+                        subtitle: Text(book.author),
+                        trailing: IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () => _showEditDialog(context, book),
                         ),
                       );
                     },
@@ -155,7 +168,6 @@ class MyBooksPage extends StatelessWidget {
 
                 SizedBox(height: 20),
 
-                // Normal Books Section
                 Text(
                   'Normal Books',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: _primaryColor),
@@ -163,39 +175,19 @@ class MyBooksPage extends StatelessWidget {
                 SizedBox(height: 10),
                 Obx(() {
                   if (controller.normalBooks.isEmpty) {
-                    return Center(
-                      child: Text('No Normal Books found.', style: TextStyle(fontSize: 16)),
-                    );
+                    return Center(child: Text('No normal books found'));
                   }
                   return ListView.builder(
                     shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
                     itemCount: controller.normalBooks.length,
                     itemBuilder: (context, index) {
                       final book = controller.normalBooks[index];
-                      return Card(
-                        margin: EdgeInsets.symmetric(vertical: 8.0),
-                        elevation: 4,
-                        child: ListTile(
-                          contentPadding: EdgeInsets.all(16.0),
-                          leading: book.coverUrl.isNotEmpty
-                              ? Image.network(book.coverUrl, width: 50, height: 75, fit: BoxFit.cover)
-                              : Icon(Icons.book, size: 50, color: _primaryColor),
-                          title: Text(book.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(book.author, style: TextStyle(fontSize: 16)),
-                              Text('Page Count: ${book.pageCount}', style: TextStyle(fontSize: 14, color: Colors.grey)),
-                              Text('Category: ${book.categoryId}', style: TextStyle(fontSize: 14, color: Colors.grey)),
-                              Text('Subcategory: ${book.subcategoryName}', style: TextStyle(fontSize: 14, color: Colors.grey)),
-                              Text('Description: ${book.description}', style: TextStyle(fontSize: 14, color: Colors.grey)),
-                            ],
-                          ),
-                          trailing: IconButton(
-                            icon: Icon(Icons.edit),
-                            onPressed: () => _showEditDialog(context, book),
-                          ),
+                      return ListTile(
+                        title: Text(book.name),
+                        subtitle: Text(book.author),
+                        trailing: IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () => _showEditDialog(context, book),
                         ),
                       );
                     },
@@ -205,41 +197,6 @@ class MyBooksPage extends StatelessWidget {
             ),
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'My Books',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favorite',
-          ),
-
-        ],
-        currentIndex: 1,
-        selectedItemColor: _primaryColor,
-        unselectedItemColor: Colors.grey,
-        onTap: (index) {
-          // Handle bottom navigation bar taps
-          switch (index) {
-            case 0:
-              Get.toNamed('/home'); // Navigate to Home
-              break;
-            case 1:
-            // Already on MyBooksPage
-              break;
-            case 2:
-              Get.toNamed('/favorite'); // Navigate to Bookmarks
-              break;
-
-          }
-        },
       ),
     );
   }

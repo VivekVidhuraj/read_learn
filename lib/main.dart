@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       child: GetMaterialApp(
-        title: 'eLibrary',
+        title: 'Read',
         debugShowCheckedModeBanner: false, // Hide debug banner
         initialRoute: '/',
         getPages: [
